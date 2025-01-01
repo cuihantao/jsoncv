@@ -679,24 +679,84 @@
       }
     },
     "mentoring": {
-      "type": "array",
-      "description": "Students mentored/advised",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "level": {
-            "type": "string",
-            "enum": ["PhD", "MS", "Undergraduate", "Postdoc"]
-          },
-          "period": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["current", "graduated", "completed"]
+      "type": "object",
+      "description": "Students mentored/advised by category",
+      "properties": {
+        "graduate_students": {
+          "type": "array",
+          "description": "Graduate students advised",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "program": {
+                "type": "string",
+                "enum": ["Ph.D.", "M.S."]
+              },
+              "startDate": {
+                "$ref": "#/definitions/iso8601"
+              },
+              "endDate": {
+                "type": "string",
+                "description": "Can be 'Present' or an ISO date"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["current", "graduated", "completed"]
+              }
+            },
+            "required": ["name", "program"]
+          }
+        },
+        "undergraduate_researchers": {
+          "type": "array",
+          "description": "Undergraduate students mentored",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "period": {
+                "type": "string",
+                "description": "e.g. Fall 23, Spring 24"
+              },
+              "program": {
+                "type": "string",
+                "description": "e.g. Freshman Research Scholar, REU"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["current", "completed"]
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "postdocs": {
+          "type": "array",
+          "description": "Postdoctoral researchers supervised",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "startDate": {
+                "$ref": "#/definitions/iso8601"
+              },
+              "endDate": {
+                "type": "string",
+                "description": "Can be 'Present' or an ISO date"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["current", "completed"]
+              }
+            },
+            "required": ["name"]
           }
         }
       }
