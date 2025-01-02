@@ -142,6 +142,12 @@ function date(item, level) {
         </div>
       </div>
       <% if (item.score) { %><div class="score row">Overall GPA: <%= item.score %></div><% } %>
+      <% if (item.dissertation) { %>
+        <div class="dissertation row">Dissertation: <%= item.dissertation %></div>
+      <% } %>
+      <% if (item.thesis) { %>
+        <div class="thesis row">Thesis: <%= item.thesis %></div>
+      <% } %>
       <% if (item.courses && item.courses.length > 0) { %>
         <div class="courses row">
           Courses: <%= item.courses.join('; ') %>
@@ -177,7 +183,7 @@ function date(item, level) {
           <%= startYear %><% if (startYear && endYear) { %> - <% } %><%= endYear %>
         </div>
       </div>
-      <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
+      <div class="summary p secondary-text"><%- fn.renderMarkdown(item.summary) %></div>
       <% if (item.highlights && item.highlights.length > 0) { %>
         <div class="highlights row">
           <ul>
@@ -573,11 +579,11 @@ function date(item, level) {
           <h4><%= item.title || 'TBD' %></h4>
           <%- date(item, 2) %>
         </div>
-        <div class="venue row subtitle">
+        <div class="venue row subtitle secondary-text">
           <%= item.venue %> (<%= item.type %>)
         </div>
         <% if (item.description) { %>
-          <div class="description p"><%- fn.renderMarkdown(item.description) %></div>
+          <div class="description p secondary-text"><%- fn.renderMarkdown(item.description) %></div>
         <% } %>
       </div>
     <% } %>
@@ -591,12 +597,12 @@ function date(item, level) {
           <h4><%= item.title %></h4>
           <%- date(item, 2) %>
         </div>
-        <div class="venue row subtitle">
+        <div class="venue row subtitle secondary-text">
           <%= item.venue %> (<%= item.type %>)
           <% if (item.location) { %> - <%= item.location %><% } %>
         </div>
         <% if (item.description) { %>
-          <div class="description p"><%- fn.renderMarkdown(item.description) %></div>
+          <div class="description p secondary-text"><%- fn.renderMarkdown(item.description) %></div>
         <% } %>
         <%- linkInDiv(item.url) %>
       </div>
@@ -608,11 +614,11 @@ function date(item, level) {
     <% for (const item of cv.presentations.outreach) { %>
       <div class="outreach section-item">
         <div class="row space-between">
-          <div class="activity"><%= item.activity %></div>
+          <h4><%= item.activity %></h4>
           <%- date(item, 2) %>
         </div>
         <% if (item.description) { %>
-          <div class="description p"><%- fn.renderMarkdown(item.description) %></div>
+          <div class="description p secondary-text"><%- fn.renderMarkdown(item.description) %></div>
         <% } %>
         <%- linkInDiv(item.url) %>
       </div>
@@ -631,12 +637,12 @@ function date(item, level) {
   <% for (const item of cv.awards) { %>
     <div class="award section-item">
       <div class="row space-between">
-        <h3><%= item.title %></h3>
+        <h4><%= item.title %></h4>
         <%- date(item, 2) %>
       </div>
       <div class="awarder row subtitle"><%= item.awarder %></div>
       <% if (item.summary) { %>
-        <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
+        <div class="summary p secondary-text"><%- fn.renderMarkdown(item.summary) %></div>
       <% } %>
     </div>
   <% } %>
@@ -662,7 +668,7 @@ function date(item, level) {
         </div>
         <div class="journal subtitle"><%= item.journal %></div>
         <% if (item.details) { %>
-          <div class="details p"><%- fn.renderMarkdown(item.details) %></div>
+          <div class="details p secondary-text"><%- fn.renderMarkdown(item.details) %></div>
         <% } %>
       </div>
     <% } %>
