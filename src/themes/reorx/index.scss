@@ -1,18 +1,41 @@
 /* Naming convention: https://ricostacruz.com/rscss/ */
 
+// Colors
+$color-black: #000;
 $color-text-dim: #777;
 $color-text-dimmer: #999;
 $color-border-dim: #aaa;
 $color-border-dimmer: #ccc;
+
+// Font sizes
 $fz-1: 32px;
 $fz-2: 20px;
 $fz-3: 16px;
 $fz-4: 14px;
+$fz-5: 13px;
+$fz-6: 12px;
 $lh-p: 1.3;
 
+// Layout system
 :root {
-  // Default color that can be overridden by meta.colorPrimary in the JSON data
+  // Default color that can be overridden by meta.colorPrimary
   --color-primary: #aaa;
+  
+  // Time display properties
+  --time-color: #{$color-black};  // Using interpolation for SCSS variable
+  --time-font-style: italic;
+  --time-min-width: 7em;
+  --time-text-align: right;
+  --time-content-ratio: 75%;
+  
+  // Spacing system
+  --content-indent: 6em;      // Left indentation for content
+  --content-padding: 1em;     // Right padding for content
+  --section-gap-large: 1.2em; // Large gaps between sections
+  --section-gap-medium: 1em;  // Medium gaps for major subsections
+  --section-gap: 0.8em;       // Normal gaps between sections
+  --section-gap-small: 0.4em; // Small gaps between items
+  --section-gap-tiny: 0.2em;  // Tiny gaps for tight spacing
 }
 
 // If meta.colorPrimary is defined in the JSON, it will be injected here by the template engine
@@ -56,7 +79,8 @@ a:hover {
 
 section {
   .section-title {
-    margin-top: 1.5em;
+    margin-top: var(--section-gap-large);
+    margin-bottom: var(--section-gap);
     display: flex;
 
     h2 {
@@ -74,7 +98,9 @@ section {
   }
 
   .section-item {
-    margin-top: 0.8em;
+    margin-top: var(--section-gap-small);
+    margin-left: var(--content-indent);
+    padding-right: var(--content-padding);
 
     h3 {
       font-size: $fz-3;
@@ -89,10 +115,10 @@ section {
     }
 
     ul {
-      margin: .4em 0;
-      padding-left: 16px;
+      margin: .3em 0;
+      padding-left: 1.5em;
       li {
-        margin-bottom: .2em;
+        margin-bottom: .15em;
       }
     }
   }
@@ -103,11 +129,11 @@ section {
     bottom: 1px;
   }
   .row {
-    margin: .2em 0;
+    margin: .15em 0;
   }
   .p, p {
     line-height: $lh-p;
-    margin: .4em 0;
+    margin: .3em 0;
   }
   .subtitle {
     font-size: $fz-4;
@@ -169,10 +195,13 @@ section {
 @media print {
   section {
     .section-title {
-      margin-top: 1.5em;
+      margin-top: var(--section-gap);
+      margin-bottom: var(--section-gap-small);
     }
     .section-item {
-      margin-top: 1em;
+      margin-top: var(--section-gap-small);
+      margin-left: var(--content-indent);
+      padding-right: var(--content-padding);
     }
   }
 }
@@ -226,38 +255,70 @@ section {
   }
 }
 
-.education-section {
-  .year {
-    color: $color-text-dim;
-    font-style: italic;
+// Shared styles for sections with smaller text
+%academic-section {
+  font-size: $fz-5;
+  
+  .section-item {
+    line-height: 1.4;
+    
+    h3 {
+      font-size: $fz-4;
+    }
+    
+    h4 {
+      font-size: $fz-5;
+    }
+    
+    .subtitle {
+      font-size: $fz-5;
+    }
   }
-  @media screen and (max-width: 700px) {
-    .space-between:nth-of-type(2) {
-      flex-wrap: wrap;
-      gap: 0.4em;
-    }
-    .study {
-      width: 100%;
-    }
+}
+
+// Shared time display style and layout
+%time-display {
+  color: var(--time-color);
+  font-style: var(--time-font-style);
+  min-width: var(--time-min-width);
+  text-align: var(--time-text-align);
+}
+
+%time-container {
+  display: flex;
+  justify-content: space-between;
+  
+  // Content side
+  > *:first-child {
+    max-width: var(--time-content-ratio);
+  }
+  
+  // Time side
+  > .year,
+  > .date-range,
+  > .period {
+    @extend %time-display;
+  }
+}
+
+.education-section {
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
   }
 }
 
 .work-section {
-  .year {
-    color: $color-text-dim;
-    font-style: italic;
-  }
-  .section-item {
-    break-inside: auto;
-    page-break-inside: auto;
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
   }
 }
 
 .projects-section {
+  @extend %academic-section;
   .space-between {
-    @media screen and (max-width: 500px) {
-      flex-wrap: wrap;
-    }
+    @extend %time-container;
   }
 }
 
@@ -320,19 +381,24 @@ section {
 }
 
 .mentoring-section {
+  @extend %academic-section;
+  
   h3 {
-    margin-top: 0.8em;
+    margin-top: var(--section-gap-medium);
+    margin-bottom: var(--section-gap-small);
     color: var(--color-primary);
-    font-size: $fz-3;
+    font-size: $fz-4;
   }
 
   h4 {
-    margin-top: 0.4em;
+    margin-top: 0.3em;
+    margin-bottom: 0.2em;
     color: $color-text-dim;
+    font-size: $fz-5;
   }
   
   .student {
-    margin-top: 0.4em;
+    margin-top: 0.2em;
     
     .name {
       font-weight: 600;
@@ -361,74 +427,116 @@ section {
   }
 }
 
-.professional-service-section {
+.professional-services-section {
+  @extend %academic-section;
+  
+  h3 {
+    margin-top: var(--section-gap-medium);
+    margin-bottom: var(--section-gap-small);
+    color: var(--color-primary);
+    font-size: $fz-4;
+  }
+
+  // Editorial Boards
   .service {
+    margin-top: var(--section-gap-tiny);
+    
+    .space-between {
+      @extend %time-container;
+    }
+    
     .role {
       font-weight: 600;
     }
-    .organization {
+    
+    .journal, .organization, .committee {
       font-style: italic;
       color: $color-text-dim;
+    }
+    
+    .details {
+      margin: var(--section-gap-tiny) 0;
+      font-size: $fz-5;
     }
   }
 }
 
 .presentations-section {
+  @extend %academic-section;
+  
   h3 {
-    margin-top: 1.2em;
+    margin-top: var(--section-gap-medium);
+    margin-bottom: var(--section-gap-small);
     color: var(--color-primary);
-    font-size: $fz-3;
+    font-size: $fz-4;
   }
 
   .talk, .presentation, .outreach {
-    margin-top: 0.6em;
+    margin-top: var(--section-gap-tiny);
     
-    h4 {
-      display: inline-block;
-      margin-right: 1em;
+    .space-between {
+      @extend %time-container;
     }
 
     .venue {
-      margin-top: 0.1em;
+      margin-top: var(--section-gap-tiny);
+      font-size: $fz-5;
     }
 
     .description {
-      margin: 0.3em 0;
+      margin: var(--section-gap-tiny) 0;
+      font-size: $fz-5;
     }
   }
 }
 
+.awards-section {
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
+  }
+}
+
+.certificates-section {
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
+  }
+}
+
 .publications-section {
+  font-size: $fz-6;
+  
   h3 {
-    margin-top: 0.75em;
-    margin-bottom: 0.3em;
+    margin-top: var(--section-gap-medium);
+    margin-bottom: var(--section-gap-small);
     color: var(--color-primary);
-    font-size: $fz-3;
+    font-size: $fz-4;
     font-weight: 600;
   }
 
-  /* Override the default section-item margin for publications */
   .section-item.publication {
     margin-top: 0.1em;
     margin-bottom: 0.1em;
+    line-height: 1.3;
   }
 
   .publications {
     .publication {
-      margin: 0.25rem;
-      padding-bottom: 0.1rem;
+      margin-left: var(--content-indent);
+      margin-bottom: 0.4em;
       
       .citation {
-        font-size: 0.9rem;
+        font-size: $fz-6;
         line-height: 1.2;
         display: flex;
         gap: 0.5em;
 
         .number {
           flex-shrink: 0;
-          color: var(--color-primary);
+          color: $color-text-dim;
           font-weight: 500;
-          font-size: 0.9rem;
+          font-size: $fz-6;
         }
 
         .text {
@@ -439,13 +547,36 @@ section {
             color: var(--color-primary);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: $fz-6;
             
             &:hover {
               text-decoration: underline;
             }
           }
         }
+      }
+    }
+  }
+}
+
+.research-areas-section {
+  @extend %academic-section;
+  
+  .section-item {
+    h3 {
+      font-size: $fz-4;
+      margin-bottom: 0.2em;
+    }
+    
+    .description {
+      font-size: $fz-5;
+      line-height: 1.3;
+    }
+    
+    .keywords {
+      margin-top: 0.4em;
+      .item {
+        font-size: $fz-6;
       }
     }
   }
