@@ -1,4 +1,4 @@
-name: CF Pages
+name: GitHub Pages
 
 on:
   push:
@@ -11,6 +11,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
@@ -25,11 +27,9 @@ jobs:
       - run: npm install
       - run: npm run build-site
 
-      - name: Publish
-        uses: cloudflare/pages-action@v1
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: jsoncv
-          directory: src/dist
-          branch: master
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: src/dist
+          force_orphan: true
