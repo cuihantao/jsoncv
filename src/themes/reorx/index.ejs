@@ -224,7 +224,7 @@ function date(item, level) {
 <% } %>
 
 <!-- Publications -->
-<% if (hasItems(cv.publications)) { %>
+<% if (hasItems(cv.publications) && cv.publications.length > 0) { %>
 <section class="publications-section">
   <div class="section-title">
     <h2>Publications</h2>
@@ -280,7 +280,7 @@ function date(item, level) {
     </div>
   <% } %>
 
-  <% if (otherPubs.length > 0) { %>
+  <% if (otherPubs && otherPubs.length > 0) { %>
     <h3>Other Publications</h3>
     <div class="publications">
       <% otherPubs.forEach((item, index) => { %>
