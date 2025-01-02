@@ -77,22 +77,23 @@
           "description": "Specify any number of social networks that you participate in",
           "items": {
             "type": "object",
-            "additionalProperties": true,
             "properties": {
               "network": {
                 "type": "string",
-                "description": "e.g. Facebook or Twitter"
+                "description": "The name of the social network (e.g. LinkedIn, Google Scholar, Scopus)",
+                "enum": ["LinkedIn", "Google Scholar", "Scopus"]
               },
               "username": {
                 "type": "string",
-                "description": "e.g. neutralthoughts"
+                "description": "e.g. your-profile-name"
               },
               "url": {
                 "type": "string",
-                "description": "e.g. http://twitter.example.com/neutralthoughts",
+                "description": "Your profile URL on this network",
                 "format": "uri"
               }
-            }
+            },
+            "required": ["network", "url"]
           }
         }
       }
@@ -298,7 +299,8 @@
             "description": "e.g. IEEE, Computer Magazine"
           },
           "releaseDate": {
-            "$ref": "#/definitions/iso8601"
+            "type": "string",
+            "description": "e.g. 2024-02-01"
           },
           "url": {
             "type": "string",
@@ -434,10 +436,12 @@
             }
           },
           "startDate": {
-            "$ref": "#/definitions/iso8601"
+            "type": "string", 
+            "description": "e.g. 2024-02-01"
           },
           "endDate": {
-            "$ref": "#/definitions/iso8601"
+            "type": "string",
+            "description": "e.g. 2024-02-01"
           },
           "url": {
             "type": "string",
@@ -519,10 +523,12 @@
             }
           },
           "startDate": {
-            "$ref": "#/definitions/iso8601"
+            "type": "string",
+            "description": "e.g. 2024-02-01"
           },
           "endDate": {
-            "$ref": "#/definitions/iso8601"
+            "type": "string",
+            "description": "e.g. 2024-02-01"
           }
         }
       }
@@ -548,33 +554,11 @@
         "lastModified": {
           "type": "string",
           "description": "Using ISO 8601 with YYYY-MM-DDThh:mm:ss"
-        }
-      }
-    },
-    "academicAppointments": {
-      "type": "array",
-      "description": "Academic positions held at universities/institutions",
-      "items": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "e.g. Associate Professor, Assistant Professor"
-          },
-          "department": {
-            "type": "string",
-            "description": "e.g. Department of Electrical and Computer Engineering"
-          },
-          "institution": {
-            "type": "string",
-            "description": "e.g. North Carolina State University"
-          },
-          "startDate": {
-            "$ref": "#/definitions/iso8601"
-          },
-          "endDate": {
-            "$ref": "#/definitions/iso8601"
-          }
+        },
+        "colorPrimary": {
+          "type": "string",
+          "description": "Primary color in hex format (e.g. #2A3FFB) to be used for styling the CV",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
         }
       }
     },
@@ -592,6 +576,10 @@
             "type": "string",
             "description": "e.g. Power System Analysis and Design"
           },
+          "description": {
+            "type": "string",
+            "description": "Course description and topics covered"
+          },
           "institution": {
             "type": "string"
           },
@@ -605,177 +593,160 @@
         }
       }
     },
-    "researchGrants": {
-      "type": "array",
-      "description": "Research grants and funded projects",
-      "items": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string",
-            "description": "e.g. PI, co-PI"
-          },
-          "fundingAgency": {
-            "type": "string",
-            "description": "e.g. National Science Foundation"
-          },
-          "amount": {
-            "type": "string",
-            "description": "e.g. $500,000"
-          },
-          "period": {
-            "type": "string",
-            "description": "e.g. 09/2024--08/2029"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["active", "completed", "pending"]
-          }
-        }
-      }
-    },
-    "editorialPositions": {
-      "type": "array",
-      "description": "Editorial board memberships and roles",
-      "items": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string",
-            "description": "e.g. Associate Editor, Guest Editor"
-          },
-          "journal": {
-            "type": "string"
-          },
-          "period": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "professionalService": {
-      "type": "array",
-      "description": "Service to professional societies and academic community",
-      "items": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string"
-          },
-          "organization": {
-            "type": "string"
-          },
-          "period": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": ["society", "committee", "conference", "review", "department"]
-          }
-        }
-      }
-    },
     "mentoring": {
       "type": "object",
       "description": "Students mentored/advised by category",
       "properties": {
-        "graduate_students": {
+        "current_students": {
           "type": "array",
-          "description": "Graduate students advised",
+          "description": "Current students at my institution",
           "items": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string"
+              },
+              "level": {
+                "type": "string",
+                "enum": ["Ph.D.", "M.S.", "Undergraduate"],
+                "description": "Academic level"
+              },
+              "startDate": {
+                "type": "string",
+                "description": "Start date in any format"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to student's website or profile",
+                "format": "uri"
+              },
+              "dissertation": {
+                "type": "string",
+                "description": "Dissertation topic or title (for PhD students)"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["Thesis", "Course-based"],
+                "description": "Type of Master's program (for MS students)"
+              },
+              "thesis_title": {
+                "type": "string",
+                "description": "Thesis title (for thesis-based MS students)"
               },
               "program": {
                 "type": "string",
-                "enum": ["Ph.D.", "M.S."]
-              },
-              "startDate": {
-                "$ref": "#/definitions/iso8601"
-              },
-              "endDate": {
-                "type": "string",
-                "description": "Can be 'Present' or an ISO date"
-              },
-              "status": {
-                "type": "string",
-                "enum": ["current", "graduated", "completed"]
-              }
-            },
-            "required": ["name", "program"]
-          }
-        },
-        "undergraduate_researchers": {
-          "type": "array",
-          "description": "Undergraduate students mentored",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
+                "description": "Program name (for undergraduate students)"
               },
               "period": {
                 "type": "string",
-                "description": "e.g. Fall 23, Spring 24"
-              },
-              "program": {
-                "type": "string",
-                "description": "e.g. Freshman Research Scholar, REU"
-              },
-              "status": {
-                "type": "string",
-                "enum": ["current", "completed"]
+                "description": "Academic period (for undergraduate students)"
               }
             },
-            "required": ["name"]
+            "required": ["name", "level"]
           }
         },
-        "postdocs": {
+        "committee_service": {
           "type": "array",
-          "description": "Postdoctoral researchers supervised",
+          "description": "PhD committee service at other institutions",
           "items": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string"
               },
-              "startDate": {
-                "$ref": "#/definitions/iso8601"
-              },
-              "endDate": {
+              "institution": {
                 "type": "string",
-                "description": "Can be 'Present' or an ISO date"
+                "description": "Institution where the student is/was enrolled"
+              },
+              "dissertation": {
+                "type": "string",
+                "description": "Dissertation title"
               },
               "status": {
                 "type": "string",
-                "enum": ["current", "completed"]
+                "enum": ["Current", "Completed"],
+                "description": "Current status of the student"
+              },
+              "completionDate": {
+                "type": "string",
+                "description": "Date of completion in any format"
               }
             },
-            "required": ["name"]
+            "required": ["name", "institution", "dissertation", "status"]
           }
-        }
-      }
-    },
-    "researchMetrics": {
-      "type": "object",
-      "properties": {
-        "citations": {
-          "type": "integer"
         },
-        "hIndex": {
-          "type": "integer"
-        },
-        "i10Index": {
-          "type": "integer"
-        },
-        "googleScholarUrl": {
-          "type": "string",
-          "format": "uri"
+        "past_students": {
+          "type": "array",
+          "description": "Past students who have completed their degrees",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "level": {
+                "type": "string",
+                "enum": ["Ph.D.", "M.S.", "Undergraduate"],
+                "description": "Academic level"
+              },
+              "institution": {
+                "type": "string",
+                "description": "Institution where the student was enrolled"
+              },
+              "startDate": {
+                "type": "string",
+                "description": "Start date in any format"
+              },
+              "endDate": {
+                "type": "string",
+                "description": "End date in any format"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to student's website or profile",
+                "format": "uri"
+              },
+              "dissertation": {
+                "type": "string",
+                "description": "Dissertation title (for PhD students)"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["Thesis", "Course-based"],
+                "description": "Type of Master's program (for MS students)"
+              },
+              "thesis_title": {
+                "type": "string",
+                "description": "Thesis title (for thesis-based MS students)"
+              },
+              "program": {
+                "type": "string",
+                "description": "Program name (for undergraduate students)"
+              },
+              "period": {
+                "type": "string",
+                "description": "Academic period (for undergraduate students)"
+              },
+              "placement": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "type": "string",
+                    "description": "Job title or position"
+                  },
+                  "organization": {
+                    "type": "string",
+                    "description": "Company or institution name"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Location of the position"
+                  }
+                }
+              }
+            },
+            "required": ["name", "level", "institution"]
+          }
         }
       }
     },
@@ -803,6 +774,197 @@
               },
               "forks": {
                 "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "researchAreas": {
+      "type": "array",
+      "description": "Research areas and contributions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the research area"
+          },
+          "contributions": {
+            "type": "array",
+            "description": "List of contributions in this area",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "object",
+      "description": "Professional service activities",
+      "properties": {
+        "editorialBoards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "description": "e.g. Associate Editor, Guest Editor"
+              },
+              "journal": {
+                "type": "string"
+              },
+              "period": {
+                "type": "string",
+                "description": "e.g. 2012-Present"
+              },
+              "details": {
+                "type": "string",
+                "description": "Additional details about the role"
+              }
+            }
+          }
+        },
+        "societyServices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "organization": {
+                "type": "string"
+              },
+              "period": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "reviewServices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "e.g. Proposal Review, Journal Review"
+              },
+              "organization": {
+                "type": "string"
+              },
+              "year": {
+                "type": "string"
+              },
+              "details": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "departmentServices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "committee": {
+                "type": "string"
+              },
+              "period": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "presentations": {
+      "type": "object",
+      "description": "Presentations and talks",
+      "properties": {
+        "invitedTalks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "venue": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "description": "e.g. Webinar, Seminar"
+              },
+              "date": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to presentation materials",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "conferencePresentations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "venue": {
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the presentation content and significance"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to presentation materials",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "outreach": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "activity": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "description": "Detailed description of the outreach activity and its impact"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to related materials",
+                "format": "uri"
               }
             }
           }
