@@ -3,7 +3,7 @@ import '@citation-js/plugin-bibtex'
 import '@citation-js/plugin-doi'
 import '@citation-js/plugin-csl'
 import { plugins } from '@citation-js/core'
-import { saveBibTeX } from './store'
+import { saveBibTeX, getCVData } from './store'
 import sampleBibTeX from '../../sample.papers.bib?raw'
 
 // Event bus for publication updates
@@ -46,23 +46,56 @@ async function initializeIEEETemplate() {
   return ieeeTemplatePromise;
 }
 
-// Basic name configuration - easier to maintain
+// Configuration for name processing
 const nameConfig = {
-  owner: 'Hantao Cui',
-  ownerStyle: 'bold',
-  advisees: ['Zaid Ibn Mahmood', 'Ahmad Ali', 'Haya Monawwar'],
-  adviseeStyle: 'plus'
+  owner: '',
+  ownerStyle: 'bold',  // will be overridden by CV data
+  advisees: [],
+  adviseeStyle: 'plus'  // will be overridden by CV data
 }
 
-// Processed configuration with variants - will be populated by processNameConfig
+// Processed configuration with name variants for pattern matching
 let processedNameConfig = {
   owner: {
     name: '',
     variants: [],
-    style: 'bold'
+    style: 'bold'  // will be overridden by CV data
   },
-  advisees: [],
-  adviseeStyle: 'plus'
+  advisees: []  // will be populated with {name, variants, style} objects
+}
+
+/**
+ * Get name configuration from CV data
+ * @param {Object} cvData - The CV data object
+ * @returns {Object} Name configuration object
+ */
+function getNameConfigFromCV(cvData) {
+  // Get citation styles from meta, or use defaults
+  const styles = cvData.meta?.citationStyles || { owner: 'bold', mentee: 'plus' }
+
+  const config = {
+    owner: cvData.basics?.name || '',
+    ownerStyle: styles.owner,
+    advisees: [],
+    adviseeStyle: styles.mentee
+  }
+
+  // Get current students
+  if (cvData.mentoring?.current_students) {
+    config.advisees.push(...cvData.mentoring.current_students.map(s => s.name))
+  }
+
+  // Get past students
+  if (cvData.mentoring?.past_students) {
+    config.advisees.push(...cvData.mentoring.past_students.map(s => s.name))
+  }
+
+  // Get committee service students
+  if (cvData.mentoring?.committee_service) {
+    config.advisees.push(...cvData.mentoring.committee_service.map(s => s.name))
+  }
+
+  return config
 }
 
 /**
@@ -110,6 +143,14 @@ function generateNameVariants(fullName) {
     variants.add(`${firstName} ${middleInitials.join('. ')}. ${lastName}`)  // Hantao I. Cui
     variants.add(`${lastName}, ${firstName} ${middleInitials.join('.')}`)  // Cui, Hantao I
   }
+
+  // Add flexible matching patterns for possible missing middle names
+  // These patterns will match names with additional middle initials
+  const firstInitial = firstName[0]
+  variants.add(`${firstInitial}\\. [A-Z]\\. ${lastName}`)  // H. ?. Cui - matches any middle initial
+  variants.add(`${firstInitial}\\. [A-Z]\\. [A-Z]\\. ${lastName}`)  // H. ?. ?. Cui - matches two middle initials
+  variants.add(`${lastName}, ${firstInitial}\\. [A-Z]\\.`)  // Cui, H. ?.
+  variants.add(`${lastName}, ${firstInitial}\\. [A-Z]\\. [A-Z]\\.`)  // Cui, H. ?. ?.
   
   const result = Array.from(variants)
   console.log(`Generated variants for ${fullName}:`, result)
@@ -117,26 +158,22 @@ function generateNameVariants(fullName) {
 }
 
 /**
- * Process the simple name configuration into a full configuration with variants
+ * Process name configuration to generate variants for pattern matching
  */
 function processNameConfig() {
-  console.log('Processing name configuration:', nameConfig)
-  
-  // Process owner
+  // Process owner name
   processedNameConfig.owner = {
     name: nameConfig.owner,
     variants: generateNameVariants(nameConfig.owner),
     style: nameConfig.ownerStyle
   }
-  
-  // Process advisees
+
+  // Process advisee names
   processedNameConfig.advisees = nameConfig.advisees.map(name => ({
-    name: name,
-    variants: generateNameVariants(name)
+    name,
+    variants: generateNameVariants(name),
+    style: nameConfig.adviseeStyle
   }))
-  processedNameConfig.adviseeStyle = nameConfig.adviseeStyle
-  
-  console.log('Processed name configuration:', processedNameConfig)
 }
 
 // Process the configuration immediately
@@ -156,49 +193,59 @@ function highlightNames(citation) {
 
   // Helper function to apply style
   function applyStyle(text, style) {
-    const styled = (() => {
-      switch (style) {
-        case 'bold':
-          return `<b>${text}</b>`
-        case 'asterisk':
-          return `${text}<sup>*</sup>`
-        case 'plus':
-          return `${text}<sup>+</sup>`
-        default:
-          return text
-      }
-    })()
-    console.log(`Applied style '${style}' to '${text}': '${styled}'`)
-    return styled
+    switch (style) {
+      case 'bold':
+        return `<b>${text}</b>`
+      case 'asterisk':
+        return `${text}<sup>*</sup>`
+      case 'plus':
+        return `${text}<sup>+</sup>`
+      default:
+        return text
+    }
+  }
+
+  // Helper function to count initials in a name
+  function countInitials(name) {
+    return (name.match(/[A-Z]\./g) || []).length
+  }
+
+  // Helper function to check if a name has more initials than expected
+  function hasMoreInitials(originalName, matchedName) {
+    const originalParts = originalName.split(' ')
+    const originalInitialsCount = originalParts.length - 1  // All parts except last name can be initials
+    const matchedInitialsCount = countInitials(matchedName)
+    return matchedInitialsCount > originalInitialsCount
   }
 
   // Process owner name
-  const ownerPatterns = [processedNameConfig.owner.name, ...processedNameConfig.owner.variants].map(escapeRegex)
-  console.log('Owner patterns:', ownerPatterns)
+  const ownerPatterns = processedNameConfig.owner.variants.map(escapeRegex)
   for (const pattern of ownerPatterns) {
     const regex = new RegExp(`\\b${pattern}\\b`, 'g')
-    const matches = result.match(regex)
-    if (matches) {
-      console.log(`Found owner matches for pattern '${pattern}':`, matches)
-    }
     result = result.replace(regex, match => applyStyle(match, processedNameConfig.owner.style))
   }
 
   // Process advisee names
   for (const advisee of processedNameConfig.advisees) {
-    const adviseePatterns = [advisee.name, ...advisee.variants].map(escapeRegex)
-    console.log(`Advisee patterns for ${advisee.name}:`, adviseePatterns)
+    const adviseePatterns = advisee.variants.map(escapeRegex)
     for (const pattern of adviseePatterns) {
       const regex = new RegExp(`\\b${pattern}\\b`, 'g')
-      const matches = result.match(regex)
-      if (matches) {
-        console.log(`Found advisee matches for pattern '${pattern}':`, matches)
-      }
-      result = result.replace(regex, match => applyStyle(match, processedNameConfig.adviseeStyle))
+      result = result.replace(regex, match => applyStyle(match, advisee.style))
+    }
+
+    // Check for names with additional initials
+    const lastName = advisee.name.split(' ').pop()
+    const regex = new RegExp(`\\b[A-Z](?:\\. [A-Z]\\.)* ${escapeRegex(lastName)}\\b`, 'g')
+    const matches = result.match(regex)
+    if (matches) {
+      matches.forEach(match => {
+        if (hasMoreInitials(advisee.name, match)) {
+          console.warn(`Warning: Found advisee name with additional initials: "${match}". Consider updating CV with full name for "${advisee.name}".`)
+        }
+      })
     }
   }
 
-  console.log('Final highlighted citation:', result)
   return result
 }
 
@@ -315,6 +362,15 @@ export async function processBibTeX(bibtexContent) {
   try {
     currentBibTeX = bibtexContent
     saveBibTeX(bibtexContent)
+    
+    // Get CV data for name highlighting
+    const cvData = getCVData()
+    if (cvData) {
+      const newConfig = getNameConfigFromCV(cvData)
+      nameConfig.owner = newConfig.owner
+      nameConfig.advisees = newConfig.advisees
+      processNameConfig()
+    }
     
     const groupedEntries = await parseBibTeX(bibtexContent)
     const publications = await convertToCV(groupedEntries)

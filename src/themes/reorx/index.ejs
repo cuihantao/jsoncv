@@ -225,6 +225,10 @@ function date(item, level) {
     <div class="line"></div>
   </div>
 
+  <div class="note" style="font-size: 0.9em; margin-bottom: 1em; font-style: italic;">
+    Names with <sup>+</sup> denote mentees of <%= cv.basics.name.split(' ').pop() %>.
+  </div>
+
   <% 
     // Group publications by type
     const journalPubs = cv.publications.filter(p => p.type === 'journal');

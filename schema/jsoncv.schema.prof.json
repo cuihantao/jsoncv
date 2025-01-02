@@ -559,6 +559,26 @@
           "type": "string",
           "description": "Primary color in hex format (e.g. #2A3FFB) to be used for styling the CV",
           "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "citationStyles": {
+          "type": "object",
+          "description": "Styles for highlighting names in citations",
+          "properties": {
+            "owner": {
+              "type": "string",
+              "description": "Style for owner's name in citations",
+              "enum": ["bold", "asterisk", "plus"]
+            },
+            "mentee": {
+              "type": "string",
+              "description": "Style for mentee names in citations",
+              "enum": ["bold", "asterisk", "plus"]
+            }
+          },
+          "default": {
+            "owner": "bold",
+            "mentee": "plus"
+          }
         }
       }
     },
