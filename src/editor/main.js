@@ -282,8 +282,9 @@ function updateColorPickerUI(color) {
   $colorValue.text(color)
   $inputColorPicker.val(color)
   savePrimaryColor(color)
-  
-  // Update the editor's JSON data
+}
+
+function syncColorWithEditor(color) {
   const data = editor.getValue()
   if (!data.meta) data.meta = {}
   data.meta.colorPrimary = color
@@ -294,6 +295,9 @@ $inputColorPicker.on('change', (e) => {
   const color = e.target.value
   console.log('color', color)
   updateColorPickerUI(color)
+  if (editor) {
+    syncColorWithEditor(color)
+  }
 })
 
 // Initialize with stored color
