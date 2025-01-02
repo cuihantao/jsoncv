@@ -22,20 +22,32 @@ $lh-p: 1.3;
   --color-primary: #aaa;
   
   // Time display properties
-  --time-color: #{$color-black};  // Using interpolation for SCSS variable
+  --time-color: #{$color-black};
   --time-font-style: italic;
   --time-min-width: 7em;
   --time-text-align: right;
   --time-content-ratio: 75%;
   
   // Spacing system
-  --content-indent: 6em;      // Left indentation for content
-  --content-padding: 1em;     // Right padding for content
-  --section-gap-large: 1.2em; // Large gaps between sections
-  --section-gap-medium: 1em;  // Medium gaps for major subsections
-  --section-gap: 0.8em;       // Normal gaps between sections
-  --section-gap-small: 0.4em; // Small gaps between items
-  --section-gap-tiny: 0.2em;  // Tiny gaps for tight spacing
+  --content-indent: 10em;      // Left indentation for content
+  --content-padding: 1em;      // Right padding for content
+  --section-gap-large: 1.2em;  // Large gaps between sections
+  --section-gap-medium: 1em;   // Medium gaps for major subsections
+  --section-gap: 0.8em;        // Normal gaps between sections
+  --section-gap-small: 0.4em;  // Small gaps between items
+  --section-gap-tiny: 0.2em;   // Tiny gaps for tight spacing
+  
+  // Print settings
+  --print-margin-top: 0.5in;    // Standard Letter margins
+  --print-margin-bottom: 0.5in;
+  --print-margin-left: 0.5in;
+  --print-margin-right: 0.5in;
+}
+
+// Add print-specific styles at the top level
+@page {
+  size: letter;  // Set to US Letter size
+  margin: var(--print-margin-top) var(--print-margin-right) var(--print-margin-bottom) var(--print-margin-left);
 }
 
 // If meta.colorPrimary is defined in the JSON, it will be injected here by the template engine
@@ -44,6 +56,25 @@ $lh-p: 1.3;
 .cv-container {
   font-size: 14px;
   font-family: system-ui, sans-serif;
+  max-width: 8.5in;  // Letter width
+  margin: 0 auto;    // Center on screen
+  
+  @media print {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    
+    // Ensure proper page breaks
+    section {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    
+    .section-item {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+  }
 
   footer {
     break-inside: avoid;
