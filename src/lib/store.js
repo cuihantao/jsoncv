@@ -3,6 +3,7 @@ export const storeKeys = {
   cvSavedTime: 'cvSavedTime',
   primaryColor: 'primary-color',
   bibTeX: 'bibTeX',
+  nameHighlighting: 'name-highlighting'
 }
 
 const defaultPrimaryColor = '#2A3FFB'
@@ -42,4 +43,14 @@ export function saveBibTeX(content) {
 
 export function getBibTeX() {
   return localStorage.getItem(storeKeys.bibTeX)
+}
+
+export function saveNameHighlightingConfig(config) {
+  localStorage.setItem(storeKeys.nameHighlighting, JSON.stringify(config))
+  updateSavedTime()
+}
+
+export function getNameHighlightingConfig() {
+  const stored = localStorage.getItem(storeKeys.nameHighlighting)
+  return stored ? JSON.parse(stored) : null
 }
