@@ -5,7 +5,7 @@ function linkInDiv(url) {
 }
 
 function formatLocation(loc) {
-  const cityToCountry = ['city', 'postalCode', 'region', 'countryCode'].map(key => loc[key]).filter(v => v).join(', ')
+  const cityToCountry = ['city', 'region', 'postalCode', 'countryCode'].map(key => loc[key]).filter(v => v).join(', ')
   if (!loc.address) return cityToCountry
   return `${loc.address}, ${cityToCountry}`
 }
