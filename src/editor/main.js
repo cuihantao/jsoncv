@@ -282,6 +282,12 @@ function updateColorPickerUI(color) {
   $colorValue.text(color)
   $inputColorPicker.val(color)
   savePrimaryColor(color)
+  
+  // Update the editor's JSON data
+  const data = editor.getValue()
+  if (!data.meta) data.meta = {}
+  data.meta.colorPrimary = color
+  editor.setValue(data)
 }
 
 $inputColorPicker.on('change', (e) => {
