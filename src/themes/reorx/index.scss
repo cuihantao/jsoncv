@@ -238,6 +238,9 @@ section {
     font-weight: 600;
     margin: .1em 0;
   }
+  .subtitle {
+    font-size: $fz-2;
+  }
   .contact {
     color: $color-text-dim;
     display: flex;
@@ -250,7 +253,7 @@ section {
 
     .item {
       a {
-        color: $color-text-dim;
+        color: var(--color-primary);
         &.colored-link {
           color: var(--color-primary);
           text-decoration: none;
