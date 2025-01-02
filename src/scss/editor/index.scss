@@ -2,6 +2,19 @@
 @use '../vars';
 @use 'json-editor';
 
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  max-width: 1920px;  // or any max-width you prefer
+  width: 100%;
+  margin: 0 auto;
+}
+
 button {
   font-size: 13px;
 }
@@ -29,6 +42,11 @@ button {
   }
   .right {
     border-left: 1px solid var(--grey-2);
+    overflow-y: hidden;
+    display: flex;
+    > * {
+      flex: 1;
+    }
   }
 }
 .editor-container {
@@ -116,7 +134,7 @@ button {
 
 .output-html {
   // set a fixed size so that responsive styles won't be applied in the iframe
-  width: 795px; // 210mm ≈ 793px
+  width: 816px;  // US Letter width (8.5 inches = 816px at 96dpi)
   height: 100%;
   margin: 0; padding: 0; border: 0;
   border-right: 1px solid var(--grey-2);

@@ -11,39 +11,41 @@
   <link rel="stylesheet" href="../scss/editor/index.scss" />
 </head>
 <body>
-  <div id="main">
-    <div class="sidebar column">
-      <div class="logo">
-        <a href="/"><span class="t-jsoncv"><span class="t-json">JSON</span>CV</span></a>
-        <div style="padding: 2px 5px;">Editor</div>
-      </div>
-      <div class="editor-toc"></div>
-      <div class="app-actions">
-        <label for="fn-color-picker" class="color-picker">
-          <div>Primary color</div>
-          <div class="color-area">
-            <input type="color" id="fn-color-picker">
-            <span class="value">#aaaaaa</span>
-          </div>
-        </label>
-        <button id="fn-toggle-preview">Preview/JSON</button>
-        <button id="fn-download-json">Download JSON</button>
-        <button id="fn-download-bibtex">Download BibTeX</button>
-        <button id="fn-download-html">Download HTML</button>
-        <button onclick="dialog.showModal()">PDF?</button>
-        <button id="fn-new-data" class="-green">New Data</button>
-        <button id="fn-upload-data" class="-green">Upload JSON CV</button>
-        <input type="file" name="upload-data" style="display: none;">
-        <button id="fn-upload-bibtex" class="-green">Upload BibTeX</button>
-        <input type="file" name="upload-bibtex" accept=".bib" style="display: none;">
-        <button id="fn-load-sample" class="-green">Load Sample</button>
+  <div class="container">
+    <div id="main">
+      <div class="sidebar column">
+        <div class="logo">
+          <a href="/"><span class="t-jsoncv"><span class="t-json">JSON</span>CV</span></a>
+          <div style="padding: 2px 5px;">Editor</div>
+        </div>
+        <div class="editor-toc"></div>
+        <div class="app-actions">
+          <label for="fn-color-picker" class="color-picker">
+            <div>Primary color</div>
+            <div class="color-area">
+              <input type="color" id="fn-color-picker">
+              <span class="value">#aaaaaa</span>
+            </div>
+          </label>
+          <button id="fn-toggle-preview">Preview/JSON</button>
+          <button id="fn-download-json">Download JSON</button>
+          <button id="fn-download-bibtex">Download BibTeX</button>
+          <button id="fn-download-html">Download HTML</button>
+          <button onclick="dialog.showModal()">PDF?</button>
+          <button id="fn-new-data" class="-green">New Data</button>
+          <button id="fn-upload-data" class="-green">Upload JSON CV</button>
+          <input type="file" name="upload-data" style="display: none;">
+          <button id="fn-upload-bibtex" class="-green">Upload BibTeX</button>
+          <input type="file" name="upload-bibtex" accept=".bib" style="display: none;">
+          <button id="fn-load-sample" class="-green">Load Sample</button>
 
+        </div>
       </div>
-    </div>
-    <div class="middle column editor-container"></div>
-    <div class="right column">
-      <div class="output-json code-block" style="display: none;"></div>
-      <iframe class="output-html" src="/preview/" frameborder="0"></iframe>
+      <div class="middle column editor-container"></div>
+      <div class="right column">
+        <div class="output-json code-block" style="display: none;"></div>
+        <iframe class="output-html" src="/preview/" frameborder="0"></iframe>
+      </div>
     </div>
   </div>
 
