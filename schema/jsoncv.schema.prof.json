@@ -898,7 +898,7 @@
             }
           }
         },
-        "departmentServices": {
+        "departmental": {
           "type": "array",
           "items": {
             "type": "object",

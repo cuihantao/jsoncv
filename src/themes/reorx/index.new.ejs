@@ -520,9 +520,9 @@
   <% } %>
 
   <!-- Department Services -->
-  <% if (hasItems(cv.services.departmentServices)) { %>
+  <% if (hasItems(cv.services.departmental)) { %>
     <h3>Department Service</h3>
-    <% for (const item of cv.services.departmentServices) { %>
+    <% for (const item of cv.services.departmental) { %>
       <div class="service section-item">
         <div class="row space-between">
           <div class="role"><%= item.role %></div>

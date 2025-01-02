@@ -56,7 +56,7 @@ const propertiesInOrder = [
 const nestedPropertiesMap = {
   basics: ['location', 'profiles'],
   presentations: ['invitedTalks', 'conferences', 'outreach'],
-  services: ['editorialBoards', 'societyServices', 'reviewServices', 'departmentServices'],
+  services: ['editorialBoards', 'societyServices', 'reviewServices', 'departmental'],
   mentoring: ['current_students', 'past_students', 'committee_service']
 }
 
