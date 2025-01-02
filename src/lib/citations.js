@@ -104,7 +104,6 @@ function getNameConfigFromCV(cvData) {
  * @returns {string[]} Array of name variants
  */
 function generateNameVariants(fullName) {
-  console.log(`Generating variants for name: ${fullName}`)
   const variants = new Set([fullName])  // start with the full name
   
   // Split the name into parts
@@ -153,7 +152,6 @@ function generateNameVariants(fullName) {
   variants.add(`${lastName}, ${firstInitial}\\. [A-Z]\\. [A-Z]\\.`)  // Cui, H. ?. ?.
   
   const result = Array.from(variants)
-  console.log(`Generated variants for ${fullName}:`, result)
   return result
 }
 
@@ -185,7 +183,6 @@ processNameConfig()
  * @returns {string} Citation with highlighted names
  */
 function highlightNames(citation) {
-  console.log('Processing citation:', citation)
   let result = citation
 
   // Helper function to escape regex special characters
@@ -291,9 +288,6 @@ export async function formatCitation(entry) {
     
     // Apply name highlighting
     baseCitation = highlightNames(baseCitation)
-    
-    console.log('Raw citation with IEEE template:', baseCitation)
-    console.log('Entry data:', formattedEntry)
     
     // Return citation without DOI - the template will add the DOI link
     return baseCitation

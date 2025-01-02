@@ -37,29 +37,53 @@ import {
 const propertiesInOrder = [
   'basics', 
   'education',
-  'teaching',
+  'work',
+  'researchAreas',
   'publications',
   'projects',
-  'software',
-  'services',
-  'mentoring',
+  'teaching',
+  'presentations',
   'awards',
+  'services',
+  'certificates',
+  'software',
   'skills',
   'languages',
   'meta'
 ]
 
-const basicsPropertiesInOrder = ['name', 'label', 'email', 'phone', 'url', 'summary', 'image', 'location', 'profiles']
+// Define nested properties for sections that need sub-navigation
+const nestedPropertiesMap = {
+  basics: ['location', 'profiles'],
+  presentations: ['invitedTalks', 'conferencePresentations', 'outreach'],
+  services: ['editorialBoards', 'societyServices', 'reviewServices', 'departmentServices'],
+  mentoring: ['current_students', 'past_students', 'committee_service']
+}
 
 // toc elements
 const elToc = document.querySelector('.editor-toc')
 const tocUl = createElement('ul', {
   parent: elToc
 })
-const basicsUl = createElement('ul', {
-  parent: tocUl
-})
 
+// Create nested navigation
+function createNestedNav(parentUl, sectionName, properties) {
+  const nestedUl = createElement('ul', {
+    parent: parentUl.lastElementChild
+  })
+  
+  properties.forEach(prop => {
+    const li = createElement('li', {parent: nestedUl})
+    createElement('a', {
+      text: prop,
+      attrs: {
+        href: `#root.${sectionName}.${prop}`
+      },
+      parent: li,
+    })
+  })
+  return nestedUl
+}
 
 // copy the object to remove the readonly restriction on module
 const jsoncvSchema = {...jsoncvSchemaModule.default}
@@ -81,27 +105,10 @@ propertiesInOrder.forEach((name, index) => {
     parent: li,
   })
 
-  if (name === 'basics') {
-    li.appendChild(basicsUl)
+  // Add nested navigation if this section has sub-properties
+  if (nestedPropertiesMap[name]) {
+    createNestedNav(tocUl, name, nestedPropertiesMap[name])
   }
-})
-
-basicsPropertiesInOrder.forEach((name, index) => {
-  if (!jsoncvSchema.properties.basics?.properties[name]) {
-    console.warn(`Property basics.${name} not found in schema`);
-    return;
-  }
-  jsoncvSchema.properties.basics.properties[name].propertyOrder = index
-  // only add location and profiles to basics toc
-  if (!['location', 'profiles'].includes(name)) return
-  const li = createElement('li', {parent: basicsUl})
-  createElement('a', {
-    text: name,
-    attrs: {
-      href: `#root.basics.${name}`
-    },
-    parent: li,
-  })
 })
 
 // add headerTemplate for each type:array in schema
@@ -115,15 +122,39 @@ traverseDownObject(jsoncvSchema, (key, obj) => {
 
 // add format to schema
 const keyFormatMap = {
+  // basics
   'basics.properties.summary': 'textarea',
+  // education
   'education.items.properties.area': 'textarea',
-  'teaching.items.properties.courseName': 'textarea',
+  'education.items.properties.dissertation': 'textarea',
+  'education.items.properties.thesis': 'textarea',
+  // work
+  'work.items.properties.summary': 'textarea',
+  'work.items.properties.highlights.items': 'textarea',
+  // researchAreas
+  'researchAreas.items.properties.contributions.items': 'textarea',
+  // publications
   'publications.items.properties.summary': 'textarea',
+  // projects
   'projects.items.properties.description': 'textarea',
   'projects.items.properties.highlights.items': 'textarea',
-  'software.items.properties.description': 'textarea',
-  'service.items.properties.role': 'textarea',
+  // teaching
+  'teaching.items.properties.courseName': 'textarea',
+  'teaching.items.properties.description': 'textarea',
+  // presentations
+  'presentations.properties.invitedTalks.items.properties.title': 'textarea',
+  'presentations.properties.conferencePresentations.items.properties.title': 'textarea',
+  'presentations.properties.conferencePresentations.items.properties.description': 'textarea',
+  'presentations.properties.outreach.items.properties.activity': 'textarea',
+  'presentations.properties.outreach.items.properties.description': 'textarea',
+  // awards
   'awards.items.properties.summary': 'textarea',
+  // services
+  'services.properties.editorialBoards.items.properties.details': 'textarea',
+  'services.properties.reviewServices.items.properties.details': 'textarea',
+  // software
+  'software.items.properties.description': 'textarea',
+  // skills and languages
   'skills.items.properties.summary': 'textarea',
   'languages.items.properties.summary': 'textarea'
 }
@@ -293,7 +324,6 @@ function syncColorWithEditor(color) {
 
 $inputColorPicker.on('change', (e) => {
   const color = e.target.value
-  console.log('color', color)
   updateColorPickerUI(color)
   if (editor) {
     syncColorWithEditor(color)
