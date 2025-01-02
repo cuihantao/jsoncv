@@ -64,13 +64,8 @@ $lh-p: 1.3;
     max-width: none;
     margin: 0;
     
-    // Ensure proper page breaks
-    section {
-      break-inside: avoid;
-      page-break-inside: avoid;
-    }
-    
-    .section-item {
+    // Only protect header and footer from breaking
+    .basics-section {
       break-inside: avoid;
       page-break-inside: avoid;
     }
