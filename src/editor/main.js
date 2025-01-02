@@ -25,7 +25,14 @@ import {
 import { getCVTitle } from '../themes/data';
 import { registerIconLib } from './je-iconlib';
 import { registerTheme } from './je-theme';
-import { loadBibTeXFile } from '../lib/citations';
+import { 
+  processBibTeX, 
+  onPublicationsUpdated, 
+  getCurrentPublications,
+  getCurrentBibTeX,
+  PUBLICATIONS_UPDATED,
+  loadSampleBibTeX
+} from '../lib/citations';
 
 const propertiesInOrder = [
   'basics', 
@@ -151,23 +158,7 @@ async function initEditor() {
     let data = getCVData()
     if (!data) data = sampleModule.default
     
-    // If we have a BibTeX file, process it
-    const bibTexPath = './papers.bib'  // Changed from '/papers.bib' to './papers.bib'
-    try {
-      const publications = await loadBibTeXFile(bibTexPath)
-      if (publications && publications.length > 0) {
-        // Merge publications with existing CV data
-        data = {
-          ...data,
-          publications: publications
-        }
-        saveCVJSON(JSON.stringify(data))
-      }
-    } catch (error) {
-      console.warn('Failed to load BibTeX file:', error)
-    }
-    
-    // Initialize the editor with the merged data
+    // Initialize the editor with current data
     const editor = new JSONEditor(elEditorContainer, {
       schema: jsoncvSchema,
       theme: 'mytheme',
@@ -176,6 +167,25 @@ async function initEditor() {
       no_additional_properties: true,
       startval: data,
     });
+
+    // Set up publication updates listener
+    onPublicationsUpdated((publications) => {
+      const currentData = editor.getValue()
+      editor.setValue({
+        ...currentData,
+        publications
+      })
+    })
+
+    // Try to load cached BibTeX if available
+    const cachedBibTeX = getBibTeX()
+    if (cachedBibTeX) {
+      try {
+        await processBibTeX(cachedBibTeX)
+      } catch (error) {
+        console.warn('Failed to process cached BibTeX:', error)
+      }
+    }
 
     editor.on('ready',() => {
       // add anchor to each schema element
@@ -342,14 +352,63 @@ $btnDownloadHTML.on('click', () => {
   downloadCV('html')
 })
 
-$btnLoadSample.on('click', () => {
+$btnLoadSample.on('click', async () => {
   if (!confirm('Are you sure to load sample data? Your current data will be replaced.')) return
 
-  const sampleData = sampleModule.default
-  editor.setValue(sampleData)
-  updateColorFromData(sampleData)
+  try {
+    // Load sample CV data
+    const sampleData = sampleModule.default
+    editor.setValue(sampleData)
+    updateColorFromData(sampleData)
+
+    // Load sample BibTeX
+    await loadSampleBibTeX()
+  } catch (error) {
+    console.error('Error loading sample data:', error)
+    alert('Failed to load sample data: ' + error.message)
+  }
 })
 
 $btnPrintPreview.on('click', () => {
   outputHTMLIframe.contentWindow.print()
+})
+
+// Add BibTeX file upload handling
+const $btnUploadBibTeX = $('#fn-upload-bibtex')
+const $btnDownloadBibTeX = $('#fn-download-bibtex')
+const $inputUploadBibTeX = $('input[name=upload-bibtex]')
+
+// Handle BibTeX file upload
+$inputUploadBibTeX.on('change', async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  
+  try {
+    const content = await file.text()
+    await processBibTeX(content)
+  } catch (error) {
+    console.error('Error processing BibTeX file:', error)
+    alert('Failed to process BibTeX file: ' + error.message)
+  }
+  
+  // Clear the input to allow uploading the same file again
+  event.target.value = ''
+})
+
+// Handle BibTeX upload button click
+$btnUploadBibTeX.on('click', () => {
+  $inputUploadBibTeX.get(0).click()
+})
+
+// Handle BibTeX download
+$btnDownloadBibTeX.on('click', () => {
+  const bibtex = getCurrentBibTeX()
+  if (!bibtex) {
+    alert('No BibTeX data available to download')
+    return
+  }
+  
+  const data = editor.getValue()
+  const title = getCVTitle(data)
+  downloadContent(`${title}.bib`, bibtex)
 })

@@ -4,6 +4,17 @@ import '@citation-js/plugin-doi'
 import '@citation-js/plugin-csl'
 import { plugins } from '@citation-js/core'
 import { saveBibTeX } from './store'
+import sampleBibTeX from '../../sample.papers.bib?raw'
+
+// Event bus for publication updates
+const publicationEvents = new EventTarget()
+
+// Publication state
+let currentPublications = []
+let currentBibTeX = null
+
+// Event types
+export const PUBLICATIONS_UPDATED = 'publications-updated'
 
 // Load IEEE CSL template from GitHub
 const IEEE_CSL = fetch('https://raw.githubusercontent.com/citation-style-language/styles/refs/heads/master/ieee.csl')
@@ -109,52 +120,43 @@ export async function convertToCV(groupedEntries) {
 }
 
 /**
- * Load and process BibTeX file
- * @param {string} path - Path to BibTeX file
- * @returns {Promise<Array>} Publications in CV JSON format
+ * Update publications and notify listeners
+ * @param {Array} publications - New publications list
  */
-export async function loadBibTeXFile(path) {
+function updatePublications(publications) {
+  currentPublications = publications
+  publicationEvents.dispatchEvent(new CustomEvent(PUBLICATIONS_UPDATED, {
+    detail: { publications }
+  }))
+}
+
+/**
+ * Subscribe to publication updates
+ * @param {Function} callback - Function to call when publications are updated
+ */
+export function onPublicationsUpdated(callback) {
+  publicationEvents.addEventListener(PUBLICATIONS_UPDATED, (event) => {
+    callback(event.detail.publications)
+  })
+}
+
+/**
+ * Process BibTeX content and update publications
+ * @param {string} bibtexContent - Raw BibTeX content
+ * @returns {Promise<Array>} Processed publications
+ */
+export async function processBibTeX(bibtexContent) {
   try {
-    console.log('Attempting to load BibTeX file from:', path)
-    console.log('Current location:', window.location.href)
+    currentBibTeX = bibtexContent
+    saveBibTeX(bibtexContent)
     
-    // Try to fetch with absolute path
-    const absolutePath = new URL(path, window.location.href).href
-    console.log('Trying absolute path:', absolutePath)
-    
-    const response = await fetch(path, {
-      headers: {
-        'Accept': 'text/plain',
-        'Cache-Control': 'no-cache'
-      }
-    })
-    
-    if (!response.ok) {
-      console.error('HTTP Error:', response.status, response.statusText)
-      console.error('Response headers:', Object.fromEntries(response.headers.entries()))
-      throw new Error(`Failed to load BibTeX file: ${response.statusText}`)
-    }
-    
-    const bibtexContent = await response.text()
-    if (!bibtexContent.trim()) {
-      throw new Error('BibTeX file is empty')
-    }
-    
-    console.log('Successfully loaded BibTeX content, first 100 chars:', bibtexContent.substring(0, 100))
-    console.log('Content length:', bibtexContent.length)
-    saveBibTeX(bibtexContent)  // Cache the BibTeX content
-    
-    console.log('Parsing BibTeX content...')
     const groupedEntries = await parseBibTeX(bibtexContent)
-    console.log('Grouped entries by type:', Object.keys(groupedEntries))
-    
     const publications = await convertToCV(groupedEntries)
-    console.log('Converted to CV format, total publications:', publications.length)
     
+    updatePublications(publications)
     return publications
   } catch (error) {
-    console.error('Error loading BibTeX file:', error)
-    console.error('Stack trace:', error.stack)
+    console.error('Error processing BibTeX:', error)
     throw error
   }
 }
@@ -224,6 +226,28 @@ export async function parseBibTeX(bibtexContent) {
       name: error.name,
       stack: error.stack
     })
+    throw error
+  }
+}
+
+// Add new utility functions
+export function getCurrentPublications() {
+  return currentPublications
+}
+
+export function getCurrentBibTeX() {
+  return currentBibTeX
+}
+
+/**
+ * Load and process the sample BibTeX file
+ * @returns {Promise<Array>} Processed publications
+ */
+export async function loadSampleBibTeX() {
+  try {
+    return await processBibTeX(sampleBibTeX)
+  } catch (error) {
+    console.error('Error loading sample BibTeX:', error)
     throw error
   }
 } 
