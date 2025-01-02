@@ -219,6 +219,14 @@
             "type": "string",
             "description": "grade point average, e.g. 3.67/4.0"
           },
+          "thesis": {
+            "type": "string",
+            "description": "Title of the thesis for Master's degree"
+          },
+          "dissertation": {
+            "type": "string",
+            "description": "Title of the dissertation for Doctoral degree"
+          },
           "courses": {
             "type": "array",
             "description": "List notable courses/subjects",
@@ -558,6 +566,11 @@
         "colorPrimary": {
           "type": "string",
           "description": "Primary color in hex format (e.g. #2A3FFB) to be used for styling the CV",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "colorSecondary": {
+          "type": "string",
+          "description": "Secondary color in hex format (e.g. #777777) to be used for dimmed text in the CV",
           "pattern": "^#[0-9A-Fa-f]{6}$"
         },
         "citationStyles": {
