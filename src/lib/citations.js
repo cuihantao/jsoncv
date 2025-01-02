@@ -61,6 +61,8 @@ export function formatCitation(entry) {
       .replace(/^\[\d+\]\s*/, '')
       // First remove DOI URLs
       .replace(/\s*\bhttps?:\/\/(?:dx\.)?doi\.org\/[^\s]+\s*/, '')
+      // Remove the first doi instance (lowercase) that appears in the middle of the citation
+      .replace(/,\s*doi:\s*10\.\d+\/[^\s]+\s*\./, '.')
       .trim()
       // Fix all period and space issues
       .replace(/\s*\.\s*\.\s*$/, '.')  // Replace trailing period-space combinations with single period
