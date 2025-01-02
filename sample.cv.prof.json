@@ -1,0 +1,236 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cuihantao/jsoncv/refs/heads/master/schema/jsoncv.schema.prof.json",
+  "basics": {
+    "name": "Jane Smith",
+    "label": "Associate Professor",
+    "image": "",
+    "email": "jane.smith@university.edu",
+    "phone": "(555) 123-4567",
+    "url": "https://janesmith.edu",
+    "summary": "Research focuses on advanced computing methods, machine learning applications, and innovative teaching approaches in engineering",
+    "location": {
+      "address": "123 University Drive",
+      "postalCode": "12345",
+      "city": "College Town",
+      "region": "ST",
+      "countryCode": "US"
+    },
+    "profiles": [
+      {
+        "network": "Google Scholar",
+        "username": "Jane Smith",
+        "url": "https://scholar.google.com/citations?user=example"
+      },
+      {
+        "network": "LinkedIn",
+        "username": "Jane Smith",
+        "url": "https://www.linkedin.com/in/janesmith/"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "State University",
+      "location": "College Town, ST",
+      "description": "Department of Engineering",
+      "position": "Associate Professor",
+      "url": "https://www.stateuniversity.edu",
+      "startDate": "2020-08-16",
+      "summary": "Research in advanced computing and applications"
+    },
+    {
+      "name": "Tech University",
+      "location": "Tech City, ST",
+      "description": "School of Engineering",
+      "position": "Assistant Professor",
+      "url": "https://www.techuniversity.edu",
+      "startDate": "2015-08-01",
+      "endDate": "2020-08-15",
+      "summary": "Research and teaching in engineering fundamentals"
+    }
+  ],
+  "volunteer": [
+    {
+      "organization": "Professional Society Conference",
+      "location": "Conference City, ST",
+      "position": "Co-Chair",
+      "url": "",
+      "startDate": "2024",
+      "endDate": "2025",
+      "summary": "Co-chairing the organization of annual conference",
+      "highlights": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "Research University",
+      "location": "Research City, USA",
+      "url": "https://www.researchuniversity.edu",
+      "area": "Engineering",
+      "studyType": "Ph.D.",
+      "startDate": "2010-08-20",
+      "endDate": "2015-05-15",
+      "score": "",
+      "dissertation": "Advanced Methods in Engineering Applications",
+      "courses": []
+    },
+    {
+      "institution": "Tech Institute",
+      "location": "Tech City, USA",
+      "url": "https://www.techinstitute.edu",
+      "area": "Engineering",
+      "studyType": "M.S.",
+      "startDate": "2008-09-01",
+      "endDate": "2010-05-30",
+      "score": "",
+      "courses": []
+    }
+  ],
+  "awards": [
+    {
+      "title": "Outstanding Research Award",
+      "date": "2023-01-01",
+      "awarder": "Professional Society"
+    },
+    {
+      "title": "Teaching Excellence Award",
+      "date": "2022-05-01",
+      "awarder": "State University"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "Professional Certification",
+      "date": "2020-12-20",
+      "issuer": "Professional Organization",
+      "url": ""
+    }
+  ],
+  "publications": [
+    {
+      "name": "Novel Methods in Engineering Applications",
+      "publisher": "Journal of Engineering",
+      "releaseDate": "2023",
+      "url": "https://doi.org/example",
+      "summary": "Innovative approach to engineering problems"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Research",
+      "level": "Expert",
+      "summary": "Expert in research methodology and advanced computing",
+      "keywords": [
+        "Research Methods",
+        "Data Analysis",
+        "Computing",
+        "Machine Learning"
+      ]
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "Native",
+      "summary": "Native speaker"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Research Project Alpha",
+      "description": "Advanced Research in Engineering Applications",
+      "summary": "Investigation of novel methods in engineering",
+      "highlights": [
+        "Successful implementation",
+        "Published results"
+      ],
+      "keywords": ["Research", "Engineering"],
+      "startDate": "2022",
+      "endDate": "Present",
+      "url": "",
+      "roles": ["Principal Investigator"],
+      "entity": "Funding Agency",
+      "type": "Research"
+    }
+  ],
+  "mentoring": {
+    "current_students": [
+      {
+        "name": "Graduate Student",
+        "level": "Ph.D.",
+        "startDate": "2022-01",
+        "url": "",
+        "dissertation": "Research Topic in Engineering"
+      }
+    ],
+    "past_students": [
+      {
+        "name": "Former Student",
+        "level": "Ph.D.",
+        "period": "2020-2022",
+        "institution": "State University",
+        "url": ""
+      }
+    ]
+  },
+  "teaching": [
+    {
+      "courseCode": "ENG 101",
+      "courseName": "Introduction to Engineering",
+      "description": "Fundamental concepts in engineering",
+      "institution": "State University",
+      "terms": ["F'23", "S'24"]
+    }
+  ],
+  "researchAreas": [
+    {
+      "name": "Advanced Engineering Methods",
+      "contributions": [
+        "Development of novel approaches",
+        "Implementation of new techniques"
+      ]
+    }
+  ],
+  "services": {
+    "editorialBoards": [
+      {
+        "role": "Associate Editor",
+        "journal": "Journal of Engineering",
+        "period": "2020-Present"
+      }
+    ],
+    "societyServices": [
+      {
+        "role": "Committee Member",
+        "organization": "Professional Society",
+        "period": "2021-Present"
+      }
+    ]
+  },
+  "presentations": {
+    "invitedTalks": [
+      {
+        "venue": "Research University",
+        "type": "Seminar",
+        "date": "2024-01",
+        "title": "Advances in Engineering Research"
+      }
+    ],
+    "outreach": [
+      {
+        "activity": "STEM Outreach Program",
+        "date": "2023-07",
+        "description": "Mentored high school students in engineering projects"
+      }
+    ]
+  },
+  "meta": {
+    "canonical": "https://raw.githubusercontent.com/cuihantao/jsoncv/refs/heads/master/schema/jsoncv.schema.prof.json",
+    "lastModified": "2024-01-01T00:00:00Z",
+    "colorPrimary": "#000080",
+    "citationStyles": {
+      "owner": "bold",
+      "mentee": "plus"
+    }
+  }
+}
