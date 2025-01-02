@@ -45,6 +45,7 @@ export default defineConfig({
       'fs': 'src/lib/fs-polyfill.js',
     },
   },
+  assetsInclude: ['**/*.bib'],
   plugins: [
     TransformEjs(),
     ViteEjsPlugin(
