@@ -68,8 +68,10 @@ export function downloadIframeHTML(filename, iframe) {
   a.href = URL.createObjectURL(blob);
   a.download = filename;
   a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a)
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
 }
 
 export function upsertStyleTag(styleId, content) {

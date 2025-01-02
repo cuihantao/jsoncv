@@ -6,8 +6,8 @@ import objectPath from 'object-path';
 
 import { JSONEditor } from '@json-editor/json-editor/dist/jsoneditor';
 
-import * as sampleModule from '../../sample.cv.json';
-import * as jsoncvSchemaModule from '../../schema/jsoncv.schema.json';
+import * as sampleModule from '../../sample.cv.prof.json';
+import * as jsoncvSchemaModule from '../../schema/jsoncv.schema.prof.json';
 import {
   getCVData,
   getPrimaryColor,
@@ -25,7 +25,21 @@ import { getCVTitle } from '../themes/data';
 import { registerIconLib } from './je-iconlib';
 import { registerTheme } from './je-theme';
 
-const propertiesInOrder = ['basics', 'education', 'work', 'projects', 'sideProjects', 'skills', 'languages', 'interests', 'references', 'awards', 'publications', 'volunteer', 'certificates', 'meta']
+const propertiesInOrder = [
+  'basics', 
+  'education',
+  'teaching',
+  'publications',
+  'projects',
+  'software',
+  'services',
+  'mentoring',
+  'awards',
+  'skills',
+  'languages',
+  'meta'
+]
+
 const basicsPropertiesInOrder = ['name', 'label', 'email', 'phone', 'url', 'summary', 'image', 'location', 'profiles']
 
 // toc elements
@@ -43,6 +57,10 @@ const jsoncvSchema = {...jsoncvSchemaModule.default}
 
 // add propertyOrder to schema, and add links to toc
 propertiesInOrder.forEach((name, index) => {
+  if (!jsoncvSchema.properties[name]) {
+    console.warn(`Property ${name} not found in schema`);
+    return;
+  }
   jsoncvSchema.properties[name].propertyOrder = index
 
   const li = createElement('li', {parent: tocUl})
@@ -58,7 +76,12 @@ propertiesInOrder.forEach((name, index) => {
     li.appendChild(basicsUl)
   }
 })
+
 basicsPropertiesInOrder.forEach((name, index) => {
+  if (!jsoncvSchema.properties.basics?.properties[name]) {
+    console.warn(`Property basics.${name} not found in schema`);
+    return;
+  }
   jsoncvSchema.properties.basics.properties[name].propertyOrder = index
   // only add location and profiles to basics toc
   if (!['location', 'profiles'].includes(name)) return
@@ -84,22 +107,25 @@ traverseDownObject(jsoncvSchema, (key, obj) => {
 // add format to schema
 const keyFormatMap = {
   'basics.properties.summary': 'textarea',
-  'work.items.properties.description': 'textarea',
-  'work.items.properties.summary': 'textarea',
-  'work.items.properties.highlights.items': 'textarea',
+  'education.items.properties.area': 'textarea',
+  'teaching.items.properties.courseName': 'textarea',
+  'publications.items.properties.summary': 'textarea',
   'projects.items.properties.description': 'textarea',
   'projects.items.properties.highlights.items': 'textarea',
-  'sideProjects.items.properties.description': 'textarea',
-  'skills.items.properties.summary': 'textarea',
-  'languages.items.properties.summary': 'textarea',
-  'references.items.properties.reference': 'textarea',
+  'software.items.properties.description': 'textarea',
+  'service.items.properties.role': 'textarea',
   'awards.items.properties.summary': 'textarea',
-  'publications.items.properties.summary': 'textarea',
-  'volunteer.items.properties.summary': 'textarea',
-  'volunteer.items.properties.highlights.items': 'textarea',
+  'skills.items.properties.summary': 'textarea',
+  'languages.items.properties.summary': 'textarea'
 }
+
 for (const [key, format] of Object.entries(keyFormatMap)) {
-  objectPath.get(jsoncvSchema.properties, key).format = format
+  const path = objectPath.get(jsoncvSchema.properties, key)
+  if (!path) {
+    console.warn(`Path ${key} not found in schema`)
+    continue
+  }
+  path.format = format
 }
 
 // change schema title
@@ -148,11 +174,19 @@ const outputHTMLIframe = $outputHTML.get(0)
 // listen to change
 editor.on('change', () => {
   console.log('on editor change')
-  const {json} = getEditorData()
+  const {data, json} = getEditorData()
   $outputJSON.text(json)
 
   // save to localstorage
   saveCVJSON(json)
+
+  // Update preview with new data
+  if (outputHTMLIframe.contentWindow) {
+    outputHTMLIframe.contentWindow.postMessage({
+      type: 'update',
+      data: data
+    }, '*')
+  }
 })
 
 // actions
@@ -192,6 +226,31 @@ $btnUploadData.on('click', () => {
   $inputUploadData.trigger('click')
 })
 
+// primary color
+function updateColorPickerUI(color) {
+  $colorValue.text(color)
+  $inputColorPicker.val(color)
+  savePrimaryColor(color)
+}
+
+$inputColorPicker.on('change', (e) => {
+  const color = e.target.value
+  console.log('color', color)
+  updateColorPickerUI(color)
+})
+
+// Initialize with stored color
+const primaryColor = getPrimaryColor()
+updateColorPickerUI(primaryColor)
+
+// Update color picker when loading data
+function updateColorFromData(data) {
+  if (data.meta?.colorPrimary) {
+    updateColorPickerUI(data.meta.colorPrimary)
+  }
+}
+
+// Update the data loading handlers
 $inputUploadData.on('change', () => {
   const files = $inputUploadData.get(0).files
   if (files.length === 0) return
@@ -201,12 +260,13 @@ $inputUploadData.on('change', () => {
     let data
     try {
       data = JSON.parse(e.target.result)
+      editor.setValue(data)
+      updateColorFromData(data)
     } catch (e) {
       const error = 'Invalid JSON file: ' + new String(e).toString()
       console.log(error)
       throw e
     }
-    editor.setValue(data)
   }
 
   reader.readAsText(files[0])
@@ -244,23 +304,11 @@ $btnDownloadHTML.on('click', () => {
 $btnLoadSample.on('click', () => {
   if (!confirm('Are you sure to load sample data? Your current data will be replaced.')) return
 
-  editor.setValue(sampleModule.default)
+  const sampleData = sampleModule.default
+  editor.setValue(sampleData)
+  updateColorFromData(sampleData)
 })
 
 $btnPrintPreview.on('click', () => {
   outputHTMLIframe.contentWindow.print()
 })
-
-
-// primary color
-
-$inputColorPicker.on('change', (e) => {
-  const color = e.target.value
-  console.log('color', color)
-  $colorValue.text(color)
-  savePrimaryColor(color)
-})
-
-const primaryColor = getPrimaryColor()
-$colorValue.text(primaryColor)
-$inputColorPicker.val(primaryColor)

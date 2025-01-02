@@ -1,120 +1,7 @@
-<%
-function linkInDiv(url) {
-  if (!url) return ''
-  return `<div class="url row"><a href="${url}" target="_blank">${fn.noSchemaURL(url)}</a></div>`
-}
-
-function formatLocation(loc) {
-  const cityToCountry = ['city', 'postalCode', 'region', 'countryCode'].map(key => loc[key]).filter(v => v).join(', ')
-  if (!loc.address) return cityToCountry
-  return `${loc.address}, ${cityToCountry}`
-}
-
-function hasItems(arr) {
-  if (arr && arr.length) return true
-  return false
-}
-
-function dateRange(item, level) {
-  let {startDate, endDate} = item
-  if (!startDate && !endDate) return ''
-  let format
-  // level: 1: year, 2: month, 3: day
-  switch (level) {
-    case 1:
-      format = 'YYYY'
-      break;
-    case 2:
-      format = 'MMM YYYY'
-      break;
-  }
-  if (format) {
-    startDate = startDate ? fn.reformatDate(startDate, format) : ''
-    endDate = endDate ? fn.reformatDate(endDate, format) : ''
-  }
-  let result = ''
-  if (startDate && endDate) {
-    result = `${startDate} – ${endDate}`
-  } else if (startDate) {
-    result = `${startDate} – Present`
-  } else if (endDate) {
-    result = `Until ${endDate}`
-  }
-  return `<div class="date-range">${result}</div>`
-}
-
-function date(item, level) {
-  let {date} = item
-  if (!date) return ''
-  let format
-  // level: 1: year, 2: month, 3: day
-  switch (level) {
-    case 1:
-      format = 'YYYY'
-      break;
-    case 2:
-      format = 'MMM YYYY'
-      break;
-  }
-  if (format) {
-    date = date ? fn.reformatDate(date, format) : ''
-  }
-  return `<div class="date-range">${date}</div>`
-}
-%>
+<%- include('_helpers.ejs') %>
 
 <!-- Basics -->
-<section class="basics-section">
-  <h1><%= cv.basics.name %></h1>
-  <% if (cv.basics.label) { %>
-    <div class="label row subtitle"><%= cv.basics.label %></div>
-  <% } %>
-  <div class="contact row">
-    <% if (cv.basics.email) { %>
-      <div class="item">
-        <%- fn.getIconSVG('mdi:email') %>
-        <span><a href="mailto:<%= cv.basics.email %>"><%= cv.basics.email %></a></span>
-      </div>
-    <% } %>
-    <% if (cv.basics.url) { %>
-      <div class="item">
-        <%- fn.getIconSVG('mdi:link-variant') %>
-        <span><a href="<%= cv.basics.url %>" target="_blank" class="colored-link"><%= fn.noSchemaURL(cv.basics.url) %></a></span>
-      </div>
-    <% } %>
-    <% if (cv.basics.profiles) { %>
-      <% for (const profile of cv.basics.profiles) { %>
-        <div class="item">
-          <% if (profile.network === 'LinkedIn') { %>
-            <%- fn.getIconSVG('mdi:linkedin') %>
-          <% } else if (profile.network === 'Google Scholar') { %>
-            <%- fn.getIconSVG('mdi:school') %>
-          <% } else if (profile.network === 'Scopus') { %>
-            <%- fn.getIconSVG('mdi:database') %>
-          <% } %>
-          <span><a href="<%= profile.url %>" target="_blank" class="colored-link"><%= profile.network %></a></span>
-        </div>
-      <% } %>
-    <% } %>
-  </div>
-  <div class="contact row">
-    <% if (cv.basics.phone) { %>
-      <div class="item">
-        <%- fn.getIconSVG('mdi:phone') %>
-        <span><%= cv.basics.phone %></span>
-      </div>
-    <% } %>
-    <% if (cv.basics.location) { %>
-      <div class="item">
-        <%- fn.getIconSVG('mdi:location') %>
-        <span><%= formatLocation(cv.basics.location) %></span>
-      </div>
-    <% } %>
-  </div>
-  <% if (cv.basics.summary) { %>
-    <div class="summary p"><%- fn.renderMarkdown(cv.basics.summary) %></div>
-  <% } %>
-</section>
+<%- include('_basics.ejs') %>
 
 <!-- Education -->
 <% if (hasItems(cv.education)) { %>
@@ -125,21 +12,15 @@ function date(item, level) {
   </div>
   <% for (const item of cv.education) { %>
     <div class="education section-item">
-      <div class="row">
+      <div class="row space-between">
         <h3><%= item.institution %></h3>
+        <%- linkInDiv(item.url) %>
       </div>
       <div class="row space-between">
         <div class="study subtitle">
           <%= item.studyType %> <%= item.area %>
         </div>
-        <div class="year">
-          <% 
-            const startYear = item.startDate ? item.startDate.split('-')[0] : '';
-            const endYear = item.endDate === 'Present' ? 'Present' : 
-                          item.endDate ? item.endDate.split('-')[0] : '';
-          %>
-          <%= startYear %><% if (startYear && endYear) { %> - <% } %><%= endYear %>
-        </div>
+        <%- dateRange(item, 2) %>
       </div>
       <% if (item.score) { %><div class="score row">Overall GPA: <%= item.score %></div><% } %>
       <% if (item.courses && item.courses.length > 0) { %>
@@ -162,20 +43,14 @@ function date(item, level) {
   <% for (const item of cv.work) { %>
     <div class="work section-item">
       <% if (item.name !== (cv.work[cv.work.indexOf(item) - 1] || {}).name) { %>
-      <div class="row">
+      <div class="row space-between">
         <h3><%= item.name %></h3>
+        <%- linkInDiv(item.url) %>
       </div>
       <% } %>
       <div class="row space-between">
         <div class="position subtitle"><%= item.position %></div>
-        <div class="year">
-          <% 
-            const startYear = item.startDate ? item.startDate.split('-')[0] : '';
-            const endYear = item.endDate === 'Present' ? 'Present' : 
-                          item.endDate ? item.endDate.split('-')[0] : 'Present';
-          %>
-          <%= startYear %><% if (startYear && endYear) { %> - <% } %><%= endYear %>
-        </div>
+        <%- dateRange(item, 2) %>
       </div>
       <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
       <% if (item.highlights && item.highlights.length > 0) { %>
@@ -715,7 +590,6 @@ function date(item, level) {
     <h2>Languages</h2>
     <div class="line"></div>
   </div>
-  <div class="two-columns">
   <% for (const item of cv.languages) { %>
     <div class="language section-item">
       <h3><%= item.language %></h3>
@@ -725,7 +599,6 @@ function date(item, level) {
       <% } %>
     </div>
   <% } %>
-  </div>
 </section>
 <% } %>
 

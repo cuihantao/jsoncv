@@ -46,5 +46,7 @@ export function renderThemeOn(name, el, data, primaryColor) {
 
   upsertStyleTag(cvStyleId, theme.style)
 
-  document.documentElement.style.setProperty(varNamePrimaryColor, primaryColor)
+  // Use meta.colorPrimary if available, otherwise use the provided primaryColor
+  const colorToUse = data.meta?.colorPrimary || primaryColor
+  document.documentElement.style.setProperty(varNamePrimaryColor, colorToUse)
 }

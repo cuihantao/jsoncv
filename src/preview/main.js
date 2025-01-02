@@ -46,6 +46,14 @@ if (data) {
   restoreScrollPosition()
 }
 
+// Listen for updates from editor
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'update') {
+    const newData = event.data.data
+    renderThemeOn(themeName, elCV, newData, getPrimaryColor())
+  }
+}, false)
+
 const savedTime = getCVSavedTime()
 console.log('preview loaded', Date.now())
 
