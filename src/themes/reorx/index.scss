@@ -400,27 +400,35 @@ section {
 
 .publications-section {
   h3 {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
+    margin-top: 0.75em;
+    margin-bottom: 0.3em;
     color: var(--color-primary);
     font-size: $fz-3;
     font-weight: 600;
   }
 
+  /* Override the default section-item margin for publications */
+  .section-item.publication {
+    margin-top: 0.1em;
+    margin-bottom: 0.1em;
+  }
+
   .publications {
     .publication {
-      margin-bottom: 0.4rem;
+      margin: 0.25rem;
+      padding-bottom: 0.1rem;
       
       .citation {
-        font-size: 0.95rem;
-        line-height: 1.3;
+        font-size: 0.9rem;
+        line-height: 1.2;
         display: flex;
-        gap: 0.7em;
+        gap: 0.5em;
 
         .number {
           flex-shrink: 0;
           color: var(--color-primary);
           font-weight: 500;
+          font-size: 0.9rem;
         }
 
         .text {
@@ -431,6 +439,7 @@ section {
             color: var(--color-primary);
             text-decoration: none;
             font-weight: 500;
+            font-size: 0.9rem;
             
             &:hover {
               text-decoration: underline;

@@ -242,7 +242,7 @@ function date(item, level) {
             <span class="text">
               <%- item.citation %>
               <% if (item.doi) { %>
-                <% if (!item.citation.trim().endsWith('.')) { %>.<% } %> DOI: <a href="https://doi.org/<%= item.doi %>" target="_blank"><%= item.doi %></a>
+                <% if (!item.citation.trim().endsWith('.')) { %>.<% } %> doi: <a href="https://doi.org/<%= item.doi %>" target="_blank"><%= item.doi %></a>
               <% } %>
             </span>
           </div>
