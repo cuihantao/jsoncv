@@ -13,6 +13,7 @@ import {
   getPrimaryColor,
   saveCVJSON,
   savePrimaryColor,
+  getBibTeX,
 } from '../lib/store';
 import {
   createElement,
@@ -24,6 +25,7 @@ import {
 import { getCVTitle } from '../themes/data';
 import { registerIconLib } from './je-iconlib';
 import { registerTheme } from './je-theme';
+import { loadBibTeXFile } from '../lib/citations';
 
 const propertiesInOrder = [
   'basics', 
@@ -143,20 +145,77 @@ if (!data) data = sampleModule.default
 registerTheme(JSONEditor)
 registerIconLib(JSONEditor)
 const elEditorContainer = document.querySelector('.editor-container')
-const editor = new JSONEditor(elEditorContainer, {
-  schema: jsoncvSchema,
-  theme: 'mytheme',
-  iconlib: 'myiconlib',
-  disable_array_delete_all_rows: true,
-  no_additional_properties: true,
-  startval: data,
-});
-editor.on('ready',() => {
-  // add anchor to each schema element
-  document.querySelectorAll('[data-schemapath]').forEach(el => {
-    const schemapath = el.getAttribute('data-schemapath')
-    el.id = schemapath
+
+async function initEditor() {
+  try {
+    let data = getCVData()
+    if (!data) data = sampleModule.default
+    
+    // If we have a BibTeX file, process it
+    const bibTexPath = './papers.bib'  // Changed from '/papers.bib' to './papers.bib'
+    try {
+      const publications = await loadBibTeXFile(bibTexPath)
+      if (publications && publications.length > 0) {
+        // Merge publications with existing CV data
+        data = {
+          ...data,
+          publications: publications
+        }
+        saveCVJSON(JSON.stringify(data))
+      }
+    } catch (error) {
+      console.warn('Failed to load BibTeX file:', error)
+    }
+    
+    // Initialize the editor with the merged data
+    const editor = new JSONEditor(elEditorContainer, {
+      schema: jsoncvSchema,
+      theme: 'mytheme',
+      iconlib: 'myiconlib',
+      disable_array_delete_all_rows: true,
+      no_additional_properties: true,
+      startval: data,
+    });
+
+    editor.on('ready',() => {
+      // add anchor to each schema element
+      document.querySelectorAll('[data-schemapath]').forEach(el => {
+        const schemapath = el.getAttribute('data-schemapath')
+        el.id = schemapath
+      })
+    })
+
+    return editor;
+  } catch (error) {
+    console.error('Error initializing editor:', error)
+    throw error
+  }
+}
+
+// Initialize the editor and store the instance
+let editor;
+initEditor().then(e => {
+  editor = e;
+  
+  // Set up editor change handler
+  editor.on('change', () => {
+    console.log('on editor change')
+    const {data, json} = getEditorData()
+    $outputJSON.text(json)
+
+    // save to localstorage
+    saveCVJSON(json)
+
+    // Update preview with new data
+    if (outputHTMLIframe.contentWindow) {
+      outputHTMLIframe.contentWindow.postMessage({
+        type: 'update',
+        data: data
+      }, '*')
+    }
   })
+}).catch(error => {
+  console.error('Failed to initialize editor:', error)
 })
 
 function getEditorData() {
@@ -170,24 +229,6 @@ function getEditorData() {
 const $outputJSON = $('.output-json')
 const $outputHTML = $('.output-html')
 const outputHTMLIframe = $outputHTML.get(0)
-
-// listen to change
-editor.on('change', () => {
-  console.log('on editor change')
-  const {data, json} = getEditorData()
-  $outputJSON.text(json)
-
-  // save to localstorage
-  saveCVJSON(json)
-
-  // Update preview with new data
-  if (outputHTMLIframe.contentWindow) {
-    outputHTMLIframe.contentWindow.postMessage({
-      type: 'update',
-      data: data
-    }, '*')
-  }
-})
 
 // actions
 const $btnTogglePreview = $('#fn-toggle-preview')

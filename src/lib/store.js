@@ -2,6 +2,7 @@ export const storeKeys = {
   cvJSON: 'cvJSON',
   cvSavedTime: 'cvSavedTime',
   primaryColor: 'primary-color',
+  bibTeX: 'bibTeX',
 }
 
 const defaultPrimaryColor = '#2A3FFB'
@@ -32,4 +33,13 @@ export function savePrimaryColor(color) {
 
 export function getPrimaryColor() {
   return localStorage.getItem(storeKeys.primaryColor) || defaultPrimaryColor
+}
+
+export function saveBibTeX(content) {
+  localStorage.setItem(storeKeys.bibTeX, content)
+  updateSavedTime()
+}
+
+export function getBibTeX() {
+  return localStorage.getItem(storeKeys.bibTeX)
 }

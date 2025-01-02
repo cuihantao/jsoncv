@@ -224,17 +224,68 @@ function date(item, level) {
     <h2>Publications</h2>
     <div class="line"></div>
   </div>
-  <% for (const item of cv.publications) { %>
-    <div class="publication section-item">
-      <div class="row space-between">
-        <h3><%= item.name %></h3>
-        <%- date(item, 2) %>
-      </div>
-      <div class="publisher row subtitle"><%= item.publisher %></div>
-      <%- linkInDiv(item.url) %>
-      <% if (item.summary) { %>
-        <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
-      <% } %>
+
+  <% 
+    // Group publications by type
+    const journalPubs = cv.publications.filter(p => p.type === 'journal');
+    const confPubs = cv.publications.filter(p => p.type === 'conference');
+    const otherPubs = cv.publications.filter(p => !p.type || (p.type !== 'journal' && p.type !== 'conference'));
+  %>
+
+  <% if (journalPubs.length > 0) { %>
+    <h3>Journal Articles</h3>
+    <div class="publications">
+      <% journalPubs.forEach((item, index) => { %>
+        <div class="publication section-item">
+          <div class="citation">
+            <span class="number">[<%= index + 1 %>]</span>
+            <span class="text">
+              <%- item.citation %>
+              <% if (item.doi) { %>
+                <% if (!item.citation.trim().endsWith('.')) { %>.<% } %> DOI: <a href="https://doi.org/<%= item.doi %>" target="_blank"><%= item.doi %></a>
+              <% } %>
+            </span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (confPubs.length > 0) { %>
+    <h3>Conference Papers</h3>
+    <div class="publications">
+      <% confPubs.forEach((item, index) => { %>
+        <div class="publication section-item">
+          <div class="citation">
+            <span class="number">[<%= index + 1 %>]</span>
+            <span class="text">
+              <%- item.citation %>
+              <% if (item.doi) { %>
+                <a href="https://doi.org/<%= item.doi %>" target="_blank">[<%= item.doi %>]</a>
+              <% } %>
+            </span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (otherPubs.length > 0) { %>
+    <h3>Other Publications</h3>
+    <div class="publications">
+      <% otherPubs.forEach((item, index) => { %>
+        <div class="publication section-item">
+          <div class="citation">
+            <span class="number">[<%= index + 1 %>]</span>
+            <span class="text">
+              <%- item.citation %>
+              <% if (item.doi) { %>
+                <a href="https://doi.org/<%= item.doi %>" target="_blank">[<%= item.doi %>]</a>
+              <% } %>
+            </span>
+          </div>
+        </div>
+      <% }); %>
     </div>
   <% } %>
 </section>
