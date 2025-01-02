@@ -196,7 +196,8 @@
       {
         "role": "Associate Editor",
         "journal": "Journal of Engineering",
-        "period": "2020-Present"
+        "period": "2020-Present",
+        "details": null
       }
     ],
     "societyServices": [
@@ -204,6 +205,21 @@
         "role": "Committee Member",
         "organization": "Professional Society",
         "period": "2021-Present"
+      }
+    ],
+    "reviewServices": [
+      {
+        "type": "Journal Review",
+        "organization": "Engineering Journal",
+        "year": "2023",
+        "details": "Reviewed technical papers"
+      }
+    ],
+    "departmentServices": [
+      {
+        "role": "Committee Member",
+        "committee": "Graduate Studies Committee",
+        "period": "2022-Present"
       }
     ]
   },
