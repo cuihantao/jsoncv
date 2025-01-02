@@ -8,8 +8,8 @@ const rootDir = resolve(__dirname, 'src')
 const renderData = {
   meta: {
     title: "jsoncv",
-    description: "A toolkit for building your CV with JSON and creating stylish HTML/PDF files.",
-    url: "https://jsoncv.reorx.com",
+    description: "A toolkit for building your CV with JSON and bibtex to create stylish HTML/PDF files.",
+    url: "https://cui.eecps.com/jsoncv",
     twitter: {
       card: "summary",
       username: "novoreorx",
@@ -17,8 +17,8 @@ const renderData = {
   },
   editorMeta: {
     title: "jsoncv Editor",
-    description: "The online editor of the jsoncv project.",
-    url: "https://jsoncv.reorx.com/editor/",
+    description: "Online editor jsoncv with bibtex support.",
+    url: "https://cui.eecps.com/jsoncv/editor/",
     twitter: {
       card: "summary",
       username: "novoreorx",
