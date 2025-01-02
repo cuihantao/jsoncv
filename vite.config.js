@@ -18,8 +18,11 @@ renderData.meta = {
   description: data.basics.summary.replace('\n', ' '),
 }
 
+// Add base URL for GitHub Pages deployment
+renderData.baseUrl = '/jsoncv/'
 
 export default defineConfig({
+  base: '/jsoncv/',  // Set base URL for all assets
   build: {
     outDir: outDir,
   },

@@ -27,6 +27,7 @@ const renderData = {
 }
 
 export default defineConfig({
+  base: '/jsoncv/',
   root: 'src',
   build: {
     // allows 'import.meta.glob' to work
