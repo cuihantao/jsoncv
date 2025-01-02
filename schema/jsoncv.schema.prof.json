@@ -947,7 +947,7 @@
             }
           }
         },
-        "conferencePresentations": {
+        "conferences": {
           "type": "array",
           "items": {
             "type": "object",

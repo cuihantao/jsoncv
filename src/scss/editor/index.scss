@@ -21,12 +21,12 @@ button {
 
 #main {
   display: grid;
-  grid-template-columns: 150px minmax(500px, 1fr) 1fr;
+  grid-template-columns: 195px minmax(500px, 1fr) 1fr;
   grid-template-rows: 100vh;
 
-  // keep the middle column 750px wide when the screen is larger that 150 + 2 * 750px
-  @media screen and (min-width: 1650px) {
-    grid-template-columns: 150px 750px 1fr;
+  // keep the middle column 750px wide when the screen is larger that 195 + 2 * 750px
+  @media screen and (min-width: 1695px) {
+    grid-template-columns: 195px 750px 1fr;
   }
 
   > .column {

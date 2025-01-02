@@ -55,7 +55,7 @@ const propertiesInOrder = [
 // Define nested properties for sections that need sub-navigation
 const nestedPropertiesMap = {
   basics: ['location', 'profiles'],
-  presentations: ['invitedTalks', 'conferencePresentations', 'outreach'],
+  presentations: ['invitedTalks', 'conferences', 'outreach'],
   services: ['editorialBoards', 'societyServices', 'reviewServices', 'departmentServices'],
   mentoring: ['current_students', 'past_students', 'committee_service']
 }
@@ -143,8 +143,8 @@ const keyFormatMap = {
   'teaching.items.properties.description': 'textarea',
   // presentations
   'presentations.properties.invitedTalks.items.properties.title': 'textarea',
-  'presentations.properties.conferencePresentations.items.properties.title': 'textarea',
-  'presentations.properties.conferencePresentations.items.properties.description': 'textarea',
+  'presentations.properties.conferences.items.properties.title': 'textarea',
+  'presentations.properties.conferences.items.properties.description': 'textarea',
   'presentations.properties.outreach.items.properties.activity': 'textarea',
   'presentations.properties.outreach.items.properties.description': 'textarea',
   // awards

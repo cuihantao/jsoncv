@@ -403,9 +403,9 @@
     <% } %>
   <% } %>
 
-  <% if (hasItems(cv.presentations.conferencePresentations)) { %>
+  <% if (hasItems(cv.presentations.conferences)) { %>
     <h3>Conference Presentations</h3>
-    <% for (const item of cv.presentations.conferencePresentations) { %>
+    <% for (const item of cv.presentations.conferences) { %>
       <div class="presentation section-item">
         <div class="row space-between">
           <h4><%= item.title %></h4>
