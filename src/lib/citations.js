@@ -16,30 +16,34 @@ let currentBibTeX = null
 // Event types
 export const PUBLICATIONS_UPDATED = 'publications-updated'
 
-// Load IEEE CSL template from GitHub
-const IEEE_CSL = fetch('https://raw.githubusercontent.com/citation-style-language/styles/refs/heads/master/ieee.csl')
-  .then(response => response.text())
-  .catch(error => {
-    console.error('Error loading IEEE CSL template:', error)
-    return null
-  })
-
 // Register plugins
 plugins.add('@citation-js/plugin-bibtex')
 plugins.add('@citation-js/plugin-doi')
 plugins.add('@citation-js/plugin-csl')
 
-// Initialize CSL plugin
-const cslPlugin = plugins.config.get('@csl')
-if (cslPlugin && cslPlugin.templates) {
-  IEEE_CSL.then(template => {
-    if (template) {
-      cslPlugin.templates.add('ieee', template)
-      console.log('Successfully registered IEEE template')
-    }
-  })
-} else {
-  console.error('CSL plugin not properly initialized')
+// Initialize CSL plugin and template
+let ieeeTemplatePromise = null;
+
+async function initializeIEEETemplate() {
+  if (ieeeTemplatePromise) return ieeeTemplatePromise;
+
+  ieeeTemplatePromise = fetch('https://raw.githubusercontent.com/citation-style-language/styles/refs/heads/master/ieee.csl')
+    .then(response => response.text())
+    .then(template => {
+      const cslPlugin = plugins.config.get('@csl')
+      if (cslPlugin && cslPlugin.templates) {
+        cslPlugin.templates.add('ieee', template)
+        console.log('Successfully registered IEEE template')
+      } else {
+        throw new Error('CSL plugin not properly initialized')
+      }
+    })
+    .catch(error => {
+      console.error('Error loading IEEE CSL template:', error)
+      throw error
+    });
+
+  return ieeeTemplatePromise;
 }
 
 /**
@@ -47,8 +51,11 @@ if (cslPlugin && cslPlugin.templates) {
  * @param {Object} entry - Citation entry from citation-js
  * @returns {string} Formatted citation
  */
-export function formatCitation(entry) {
+export async function formatCitation(entry) {
   try {
+    // Ensure IEEE template is loaded
+    await initializeIEEETemplate();
+    
     const cite = new Cite()
     
     // Ensure entry is in the correct format
