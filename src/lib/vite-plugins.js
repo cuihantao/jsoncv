@@ -1,4 +1,5 @@
-
+import fs from 'fs'
+import path from 'path'
 
 /*
  * This plugin allows for importing ejs files as strings.
@@ -15,6 +16,24 @@ export function TransformEjs() {
         return {
           code: `export default ${JSON.stringify(src)}`,
           map: null, // provide source map if available
+        }
+      }
+    },
+  }
+}
+
+/*
+ * This plugin allows for importing bib files as strings.
+ */
+export function TransformBib() {
+  return {
+    name: 'transform-bib',
+
+    transform(src, id) {
+      if (id.endsWith('.bib')) {
+        return {
+          code: `export default ${JSON.stringify(src)}`,
+          map: null,
         }
       }
     },

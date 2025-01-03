@@ -3,18 +3,35 @@ import '@citation-js/plugin-bibtex'
 import '@citation-js/plugin-doi'
 import '@citation-js/plugin-csl'
 import { plugins } from '@citation-js/core'
-import { saveBibTeX, getCVData } from './store'
-import defaultBibTeX from '../../sample.bib?raw'  // Import default at build time
+import { saveBibTeX, getCVData, getBibTeX, getBibFileName } from './store'
 
 // Event bus for publication updates
 const publicationEvents = new EventTarget()
 
-// Publication state
-let currentPublications = []
-let currentBibTeX = null
-
 // Event types
 export const PUBLICATIONS_UPDATED = 'publications-updated'
+
+// Configuration for name processing
+const nameConfig = {
+  owner: '',
+  ownerStyle: 'bold',  // will be overridden by CV data
+  advisees: [],
+  adviseeStyle: 'plus'  // will be overridden by CV data
+}
+
+// Processed configuration with name variants for pattern matching
+let processedNameConfig = {
+  owner: {
+    name: '',
+    variants: [],
+    style: 'bold'  // will be overridden by CV data
+  },
+  advisees: []  // will be populated with {name, variants, style} objects
+}
+
+// Publication state
+let currentPublications = []
+let currentBibTeX = getBibTeX() || ''
 
 // Register plugins
 plugins.add('@citation-js/plugin-bibtex')
@@ -46,22 +63,16 @@ async function initializeIEEETemplate() {
   return ieeeTemplatePromise;
 }
 
-// Configuration for name processing
-const nameConfig = {
-  owner: '',
-  ownerStyle: 'bold',  // will be overridden by CV data
-  advisees: [],
-  adviseeStyle: 'plus'  // will be overridden by CV data
-}
+// Debug: Log initial state
+console.log('citations.js: Initializing...')
+console.log('Initial BIB content length:', currentBibTeX.length)
 
-// Processed configuration with name variants for pattern matching
-let processedNameConfig = {
-  owner: {
-    name: '',
-    variants: [],
-    style: 'bold'  // will be overridden by CV data
-  },
-  advisees: []  // will be populated with {name, variants, style} objects
+// If we have content, process it immediately
+if (currentBibTeX) {
+  console.log('Processing initial BIB content...')
+  processBibTeX(currentBibTeX).catch(error => {
+    console.error('Failed to process initial BIB content:', error)
+  })
 }
 
 /**
@@ -354,20 +365,32 @@ export function onPublicationsUpdated(callback) {
  */
 export async function processBibTeX(bibtexContent) {
   try {
+    console.log('Processing BibTeX content, length:', bibtexContent?.length || 0)
+    if (!bibtexContent) {
+      console.warn('Empty BibTeX content provided to processBibTeX')
+      return []
+    }
+
     currentBibTeX = bibtexContent
     saveBibTeX(bibtexContent)
     
     // Get CV data for name highlighting
     const cvData = getCVData()
     if (cvData) {
+      console.log('Got CV data for name highlighting')
       const newConfig = getNameConfigFromCV(cvData)
       nameConfig.owner = newConfig.owner
       nameConfig.advisees = newConfig.advisees
       processNameConfig()
+    } else {
+      console.warn('No CV data available for name highlighting')
     }
     
     const groupedEntries = await parseBibTeX(bibtexContent)
+    console.log('Parsed BibTeX entries:', Object.keys(groupedEntries).length, 'types')
+    
     const publications = await convertToCV(groupedEntries)
+    console.log('Converted to CV format:', publications.length, 'publications')
     
     updatePublications(publications)
     return publications
@@ -456,40 +479,19 @@ export function getCurrentBibTeX() {
 }
 
 /**
- * Load BibTeX content from a file
- * @param {string} filename - Path to BibTeX file
- * @returns {Promise<string>} BibTeX content
- */
-async function loadBibTeXFile(filename) {
-  try {
-    // If it's the default file, use the imported content
-    if (filename === './sample.bib') {
-      return defaultBibTeX
-    }
-    
-    // Otherwise, try to fetch the file
-    const response = await fetch(filename)
-    if (!response.ok) {
-      throw new Error(`Failed to load BibTeX file: ${response.statusText}`)
-    }
-    return await response.text()
-  } catch (error) {
-    console.error('Error loading BibTeX file:', error)
-    throw error
-  }
-}
-
-/**
- * Load and process the BibTeX file
- * @param {string} [customBibFile] - Optional custom BibTeX file path
+ * Load BibTeX content from store and process it
  * @returns {Promise<Array>} Processed publications
  */
-export async function loadBibTeX(customBibFile) {
+export function loadBibTeX() {
   try {
-    // Get the BibTeX file path from the configuration or use the provided custom file
-    const bibFile = customBibFile || window.renderData?.bibFilename || './sample.bib'
-    const bibtexContent = await loadBibTeXFile(bibFile)
-    return await processBibTeX(bibtexContent)
+    const bibtexContent = getBibTeX()
+    const filename = getBibFileName() || 'unknown'
+    console.log(`Loading BibTeX from store (${filename}), content length:`, bibtexContent?.length || 0)
+    if (!bibtexContent) {
+      console.warn('No BibTeX content found in store')
+      return []
+    }
+    return processBibTeX(bibtexContent)
   } catch (error) {
     console.error('Error loading BibTeX:', error)
     throw error

@@ -3,6 +3,7 @@ export const storeKeys = {
   cvSavedTime: 'cvSavedTime',
   primaryColor: 'primary-color',
   bibTeX: 'bibTeX',
+  bibFileName: 'bibFileName',
   nameHighlighting: 'name-highlighting'
 }
 
@@ -36,13 +37,26 @@ export function getPrimaryColor() {
   return localStorage.getItem(storeKeys.primaryColor) || defaultPrimaryColor
 }
 
-export function saveBibTeX(content) {
+export function saveBibTeX(content, filename) {
+  console.log('Saving BIB content to store, length:', content?.length || 0)
+  console.log('Saving BIB filename to store:', filename)
   localStorage.setItem(storeKeys.bibTeX, content)
+  if (filename) {
+    localStorage.setItem(storeKeys.bibFileName, filename)
+  }
   updateSavedTime()
 }
 
 export function getBibTeX() {
-  return localStorage.getItem(storeKeys.bibTeX)
+  const content = localStorage.getItem(storeKeys.bibTeX)
+  console.log('Getting BIB content from store, length:', content?.length || 0)
+  return content
+}
+
+export function getBibFileName() {
+  const filename = localStorage.getItem(storeKeys.bibFileName)
+  console.log('Getting BIB filename from store:', filename || 'none')
+  return filename
 }
 
 export function saveNameHighlightingConfig(config) {
