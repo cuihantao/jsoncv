@@ -355,16 +355,16 @@ function date(item, level) {
   </div>
   <% for (const item of cv.teaching) { %>
     <div class="course section-item">
-      <div class="row">
-        <div class="code"><%= item.courseCode %></div>
-        <div class="name"><%= item.courseName %></div>
+      <div class="row space-between">
+        <div class="course-info">
+          <div class="code"><%= item.courseCode %></div>
+          <div class="name"><%= item.courseName %></div>
+        </div>
+        <div class="terms"><%= item.terms.join(', ') %></div>
       </div>
       <% if (item.description) { %>
         <div class="description p"><%- fn.renderMarkdown(item.description) %></div>
       <% } %>
-      <div class="terms row">
-        <%= item.terms.join(', ') %>
-      </div>
     </div>
   <% } %>
 </section>

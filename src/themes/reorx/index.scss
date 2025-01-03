@@ -386,12 +386,18 @@ section {
       display: flex;
       gap: 1em;
     }
+    .course-info {
+      display: flex;
+      gap: 1em;
+    }
     .code {
       font-weight: 600;
     }
     .terms {
       color: $color-text-dim;
       font-style: italic;
+      min-width: 7em;
+      text-align: right;
     }
   }
 }
