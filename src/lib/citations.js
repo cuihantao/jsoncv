@@ -4,7 +4,7 @@ import '@citation-js/plugin-doi'
 import '@citation-js/plugin-csl'
 import { plugins } from '@citation-js/core'
 import { saveBibTeX, getCVData } from './store'
-import sampleBibTeX from '../../sample.papers.bib?raw'
+import defaultBibTeX from '../../sample.bib?raw'  // Import default at build time
 
 // Event bus for publication updates
 const publicationEvents = new EventTarget()
@@ -456,14 +456,45 @@ export function getCurrentBibTeX() {
 }
 
 /**
- * Load and process the sample BibTeX file
- * @returns {Promise<Array>} Processed publications
+ * Load BibTeX content from a file
+ * @param {string} filename - Path to BibTeX file
+ * @returns {Promise<string>} BibTeX content
  */
-export async function loadSampleBibTeX() {
+async function loadBibTeXFile(filename) {
   try {
-    return await processBibTeX(sampleBibTeX)
+    // If it's the default file, use the imported content
+    if (filename === './sample.bib') {
+      return defaultBibTeX
+    }
+    
+    // Otherwise, try to fetch the file
+    const response = await fetch(filename)
+    if (!response.ok) {
+      throw new Error(`Failed to load BibTeX file: ${response.statusText}`)
+    }
+    return await response.text()
   } catch (error) {
-    console.error('Error loading sample BibTeX:', error)
+    console.error('Error loading BibTeX file:', error)
     throw error
   }
-} 
+}
+
+/**
+ * Load and process the BibTeX file
+ * @param {string} [customBibFile] - Optional custom BibTeX file path
+ * @returns {Promise<Array>} Processed publications
+ */
+export async function loadBibTeX(customBibFile) {
+  try {
+    // Get the BibTeX file path from the configuration or use the provided custom file
+    const bibFile = customBibFile || window.renderData?.bibFilename || './sample.bib'
+    const bibtexContent = await loadBibTeXFile(bibFile)
+    return await processBibTeX(bibtexContent)
+  } catch (error) {
+    console.error('Error loading BibTeX:', error)
+    throw error
+  }
+}
+
+// Replace the old loadSampleBibTeX with the new loadBibTeX function
+export const loadSampleBibTeX = loadBibTeX 

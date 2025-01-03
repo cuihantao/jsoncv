@@ -7,12 +7,14 @@ import { TransformEjs } from './src/lib/vite-plugins';
 import { getRenderData } from './src/themes/data';
 
 const dataFilename = process.env.DATA_FILENAME || './sample.cv.json'
+const bibFilename = process.env.BIB_FILENAME || './sample.bib'
 const outDir = process.env.OUT_DIR || 'dist'
 
 const data = require(dataFilename)
 const renderData = getRenderData(data)
 renderData.theme = process.env.THEME || 'reorx'
 renderData.isProduction = process.env.NODE_ENV === 'production'
+renderData.bibFilename = bibFilename
 renderData.meta = {
   title: data.basics.name,
   description: data.basics.summary.replace('\n', ' '),
