@@ -38,8 +38,9 @@ export function getPrimaryColor() {
 }
 
 export function saveBibTeX(content, filename) {
-  console.log('Saving BIB content to store, length:', content?.length || 0)
-  console.log('Saving BIB filename to store:', filename)
+  console.log('[Debug][Store] Saving BIB content to store, length:', content?.length || 0)
+  console.log('[Debug][Store] First 100 chars:', content?.substring(0, 100))
+  console.log('[Debug][Store] Saving BIB filename:', filename)
   localStorage.setItem(storeKeys.bibTeX, content)
   if (filename) {
     localStorage.setItem(storeKeys.bibFileName, filename)
@@ -49,13 +50,22 @@ export function saveBibTeX(content, filename) {
 
 export function getBibTeX() {
   const content = localStorage.getItem(storeKeys.bibTeX)
-  console.log('Getting BIB content from store, length:', content?.length || 0)
+  console.log('[Debug][Store] Getting BIB content from store, length:', content?.length || 0)
+  if (!content && typeof window !== 'undefined' && window.__BIBTEX_CONTENT__) {
+    console.log('[Debug][Store] No content in localStorage, using injected content')
+    console.log('[Debug][Store] Injected content length:', window.__BIBTEX_CONTENT__.length)
+    console.log('[Debug][Store] First 100 chars:', window.__BIBTEX_CONTENT__.substring(0, 100))
+    return window.__BIBTEX_CONTENT__
+  }
+  if (content) {
+    console.log('[Debug][Store] First 100 chars from store:', content.substring(0, 100))
+  }
   return content
 }
 
 export function getBibFileName() {
   const filename = localStorage.getItem(storeKeys.bibFileName)
-  console.log('Getting BIB filename from store:', filename || 'none')
+  console.log('[Debug][Store] Getting BIB filename from store:', filename || 'none')
   return filename
 }
 

@@ -6,33 +6,25 @@ import fs from 'fs';
 
 import { TransformEjs } from './src/lib/vite-plugins';
 import { getRenderData } from './src/themes/data';
-import { saveBibTeX } from './src/lib/store';
 
 const dataFilename = process.env.DATA_FILENAME || './cui.cv.json'
 const bibFilename = process.env.BIB_FILENAME || './cui.papers.bib'
 const outDir = process.env.OUT_DIR || 'dist'
 
-// Load and save BIB file content to store
+// Load and validate BIB file
+let bibContent = ''
 try {
-  const bibContent = fs.readFileSync(bibFilename, 'utf-8')
-  console.log('Read BIB file content, length:', bibContent.length)
-  
-  // Check if localStorage is available
-  if (typeof localStorage === 'undefined') {
-    console.warn('localStorage not available during build, BIB content will not be saved to store')
-  } else {
-    saveBibTeX(bibContent, bibFilename)
-    console.log('Saved BIB content to store')
-  }
-  
-  console.log(`Successfully loaded BIB file from ${bibFilename}`)
+  bibContent = fs.readFileSync(bibFilename, 'utf-8')
+  console.log('[Debug][Config] Successfully loaded BIB file:', bibFilename)
+  console.log('[Debug][Config] BIB content length:', bibContent.length)
+  console.log('[Debug][Config] First 100 chars:', bibContent.substring(0, 100))
 } catch (error) {
-  console.error(`Failed to read BIB file ${bibFilename}:`, error)
-  process.exit(1)
+  console.warn('[Debug][Config] Failed to read BIB file:', bibFilename, error)
 }
 
 const data = require(dataFilename)
 const renderData = getRenderData(data)
+
 renderData.theme = process.env.THEME || 'reorx'
 renderData.isProduction = process.env.NODE_ENV === 'production'
 renderData.bibFilename = bibFilename
@@ -45,23 +37,47 @@ renderData.meta = {
 renderData.baseUrl = '/jsoncv/'
 
 export default defineConfig({
-  base: '/jsoncv/',  // Set base URL for all assets
+  base: '/jsoncv/',
   build: {
     outDir: outDir,
   },
   resolve: {
     alias: {
-      // remove the "Module "fs" has been externalized" warning for ejs
       'fs': 'src/lib/fs-polyfill.js',
+      '@': resolve(__dirname, 'src'),
     },
   },
+  assetsInclude: ['**/*.bib'],  // Include .bib files as assets
   plugins: [
+    {
+      name: 'inject-bibtex',
+      transformIndexHtml(html) {
+        // Inject BibTeX content as a global variable before any other scripts
+        return html.replace(
+          '<head>',
+          `<head>
+          <script>
+            console.log('[Debug][Init] Starting BibTeX injection...');
+            window.__BIBTEX_CONTENT__ = ${JSON.stringify(bibContent)};
+            window.__BIBTEX_FILENAME__ = ${JSON.stringify(bibFilename)};
+            console.log('[Debug][Init] BibTeX content length:', window.__BIBTEX_CONTENT__?.length || 0);
+            console.log('[Debug][Init] First 100 chars:', window.__BIBTEX_CONTENT__?.substring(0, 100));
+            // Initialize localStorage only in browser context
+            if (typeof window !== 'undefined' && window.localStorage) {
+              window.localStorage.setItem('bibTeX', window.__BIBTEX_CONTENT__);
+              window.localStorage.setItem('bibFileName', window.__BIBTEX_FILENAME__);
+              console.log('[Debug][Init] Initialized localStorage with BibTeX');
+              console.log('[Debug][Init] Verify localStorage content length:', window.localStorage.getItem('bibTeX')?.length || 0);
+            }
+          </script>`
+        )
+      }
+    },
     TransformEjs(),
     ViteEjsPlugin(
       renderData,
       {
         ejs: (viteConfig) => ({
-          // ejs options goes here.
           views: [resolve(__dirname)],
         })
       }

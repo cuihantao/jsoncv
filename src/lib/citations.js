@@ -34,9 +34,11 @@ let currentPublications = []
 let currentBibTeX = getBibTeX() || ''
 
 // Register plugins
+console.log('[Debug][Citations] Registering plugins...')
 plugins.add('@citation-js/plugin-bibtex')
 plugins.add('@citation-js/plugin-doi')
 plugins.add('@citation-js/plugin-csl')
+console.log('[Debug][Citations] Plugins registered')
 
 // Initialize CSL plugin and template
 let ieeeTemplatePromise = null;
@@ -44,19 +46,20 @@ let ieeeTemplatePromise = null;
 async function initializeIEEETemplate() {
   if (ieeeTemplatePromise) return ieeeTemplatePromise;
 
+  console.log('[Debug][Citations] Fetching IEEE template...')
   ieeeTemplatePromise = fetch('https://raw.githubusercontent.com/citation-style-language/styles/refs/heads/master/ieee.csl')
     .then(response => response.text())
     .then(template => {
       const cslPlugin = plugins.config.get('@csl')
       if (cslPlugin && cslPlugin.templates) {
         cslPlugin.templates.add('ieee', template)
-        console.log('Successfully registered IEEE template')
+        console.log('[Debug][Citations] Successfully registered IEEE template')
       } else {
         throw new Error('CSL plugin not properly initialized')
       }
     })
     .catch(error => {
-      console.error('Error loading IEEE CSL template:', error)
+      console.error('[Debug][Citations] Error loading IEEE CSL template:', error)
       throw error
     });
 
@@ -64,15 +67,20 @@ async function initializeIEEETemplate() {
 }
 
 // Debug: Log initial state
-console.log('citations.js: Initializing...')
-console.log('Initial BIB content length:', currentBibTeX.length)
+console.log('[Debug][Citations] Initializing...')
+console.log('[Debug][Citations] Initial BIB content length:', currentBibTeX.length)
+if (currentBibTeX) {
+  console.log('[Debug][Citations] First 100 chars:', currentBibTeX.substring(0, 100))
+}
 
 // If we have content, process it immediately
 if (currentBibTeX) {
-  console.log('Processing initial BIB content...')
+  console.log('[Debug][Citations] Processing initial BIB content...')
   processBibTeX(currentBibTeX).catch(error => {
-    console.error('Failed to process initial BIB content:', error)
+    console.error('[Debug][Citations] Failed to process initial BIB content:', error)
   })
+} else {
+  console.warn('[Debug][Citations] No initial BibTeX content available')
 }
 
 /**

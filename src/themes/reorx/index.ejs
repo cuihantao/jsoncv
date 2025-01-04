@@ -1,3 +1,69 @@
+<script type="module">
+  // Use @/ prefix for Vite module resolution
+  import { processBibTeX } from '@/lib/citations.js';
+  
+  // Helper function to find and update section
+  function updateSection(pubsSection, sectionTitle, publications) {
+    const h3Elements = Array.from(pubsSection.getElementsByTagName('h3'));
+    const sectionHeader = h3Elements.find(h3 => h3.textContent.trim() === sectionTitle);
+    
+    if (sectionHeader) {
+      const pubsContainer = sectionHeader.nextElementSibling;
+      if (pubsContainer?.classList.contains('publications')) {
+        console.log(`[Debug][Template] Found ${sectionTitle} section, updating with`, publications.length, 'publications');
+        pubsContainer.innerHTML = publications.map((item, index) => `
+          <div class="publication section-item">
+            <div class="citation">
+              <span class="number">[${index + 1}]</span>
+              <span class="text">
+                ${item.citation}
+                ${item.doi ? `<a href="https://doi.org/${item.doi}" target="_blank">[${item.doi}]</a>` : ''}
+              </span>
+            </div>
+          </div>
+        `).join('');
+        return true;
+      }
+    }
+    console.log(`[Debug][Template] Section ${sectionTitle} not found or invalid structure`);
+    return false;
+  }
+
+  // Initialize citations when the page loads
+  window.addEventListener('DOMContentLoaded', async () => {
+    console.log('[Debug][Template] DOM loaded, initializing citations...');
+    
+    // Get BibTeX content from injected global
+    if (window.__BIBTEX_CONTENT__) {
+      console.log('[Debug][Template] Found BibTeX content, processing...');
+      try {
+        const publications = await processBibTeX(window.__BIBTEX_CONTENT__);
+        console.log('[Debug][Template] Processed publications:', publications.length);
+        
+        // Re-render publications section
+        const pubsSection = document.querySelector('.publications-section');
+        if (pubsSection) {
+          console.log('[Debug][Template] Found publications section');
+          
+          // Group publications by type
+          const journalPubs = publications.filter(p => p.type === 'journal');
+          const confPubs = publications.filter(p => p.type === 'conference');
+          
+          // Update each section
+          updateSection(pubsSection, 'Journal Articles', journalPubs);
+          updateSection(pubsSection, 'Conference Papers', confPubs);
+        } else {
+          console.warn('[Debug][Template] Publications section not found');
+        }
+      } catch (error) {
+        console.error('[Debug][Template] Failed to process BibTeX:', error);
+      }
+    } else {
+      console.warn('[Debug][Template] No BibTeX content found');
+    }
+  });
+</script>
+
 <%
 function linkInDiv(url) {
   if (!url) return ''
