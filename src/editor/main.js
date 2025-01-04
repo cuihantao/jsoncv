@@ -40,7 +40,6 @@ const basicsUl = createElement('ul', { parent: tocUl })
 // init data
 let data = getCVData()
 if (!data) data = sampleModule.default
-console.log('Initial data:', data)
 
 // Initialize editor with schema and data
 async function initializeEditor() {
@@ -48,13 +47,10 @@ async function initializeEditor() {
   let schema
   if (data.$schema) {
     try {
-      console.log('Fetching schema from:', data.$schema)
       const response = await fetch(data.$schema)
       schema = await response.json()
-      console.log('Fetched schema:', schema)
     } catch (error) {
       console.error('Error fetching schema:', error)
-      console.log('Falling back to local schema')
       schema = {...jsoncvSchemaModule.default}
     }
   } else {
@@ -63,12 +59,8 @@ async function initializeEditor() {
 
   // Validate schema structure
   if (!schema || !schema.properties) {
-    console.error('Invalid schema structure:', schema)
-    console.log('Falling back to local schema')
     schema = {...jsoncvSchemaModule.default}
   }
-
-  console.log('Initial schema:', schema)
 
   // Add property order and build TOC
   const excludeFromTOC = ['$schema', 'sideProjects', 'languages', 'interests']
@@ -167,9 +159,6 @@ async function initializeEditor() {
       const property = objectPath.get(schema.properties, key)
       if (property) {
         property.format = value
-        console.log(`Added format ${value} to ${key}`)
-      } else {
-        console.warn(`Property path ${key} not found in schema`)
       }
     } else {
       // Nested format mappings
@@ -178,9 +167,6 @@ async function initializeEditor() {
         const property = objectPath.get(schema.properties, fullKey)
         if (property) {
           property.format = format
-          console.log(`Added format ${format} to ${fullKey}`)
-        } else {
-          console.warn(`Property path ${fullKey} not found in schema`)
         }
       }
     }
@@ -191,8 +177,6 @@ async function initializeEditor() {
   if (schema.properties.meta?.properties?.lastModified) {
     schema.properties.meta.properties.lastModified.description += '. This will be automatically updated when downloading.'
   }
-
-  console.log('Final schema after processing:', schema)
 
   // Initialize editor
   registerTheme(JSONEditor)
