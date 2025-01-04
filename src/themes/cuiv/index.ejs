@@ -235,6 +235,11 @@ function date(item, level) {
       <div class="row">
         <h3><%= item.name %></h3>
       </div>
+      <% if (item.authors?.length) { %>
+        <div class="authors row">
+          <%= item.authors.join('; ') %>
+        </div>
+      <% } %>
       <div class="publisher row subtitle">
         <%= item.publisher %><% if (item.releaseDate) { %>, <%= fn.reformatDate(item.releaseDate, 'YYYY') %><% } %>
       </div>

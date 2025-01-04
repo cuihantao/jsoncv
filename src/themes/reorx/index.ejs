@@ -376,11 +376,12 @@ function date(item, level) {
 <section class="publications">
   <h2>Publications</h2>
   <% cv.publications.forEach(function(pub) { %>
+    <% console.log('[Debug] Template rendering publication:', pub) %>
     <div class="item">
       <div class="title"><%= pub.name %></div>
       <% if (pub.authors?.length) { %>
         <div class="authors">
-          <%= pub.authors.map(a => `${a.lastName}${a.firstName ? `, ${a.firstName}` : ''}`).join('; ') %>
+          <%= pub.authors.join('; ') %>
         </div>
       <% } %>
       <div class="publisher">
