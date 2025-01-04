@@ -1,13 +1,13 @@
-import 'iconify-icon'; // import only
-
+// Core dependencies first
+import { JSONEditor } from '@json-editor/json-editor/dist/jsoneditor';
 import $ from 'cash-dom';
 import dayjs from 'dayjs';
 import objectPath from 'object-path';
 
-import { JSONEditor } from '@json-editor/json-editor/dist/jsoneditor';
-
-import * as sampleModule from '../../sample.cv.json';
+// Local imports
+import * as sampleModule from '../../sample/sample.cv.prof.json';
 import * as jsoncvSchemaModule from '../../schema/jsoncv.schema.json';
+import { processBibTeX, updatePublications, getLastBibTeX } from '../lib/bibtex';
 import {
   getCVData,
   getPrimaryColor,
@@ -24,6 +24,9 @@ import {
 import { getCVTitle } from '../themes/data';
 import { registerIconLib } from './je-iconlib';
 import { registerTheme } from './je-theme';
+
+// Load iconify last as it's optional for UI
+import 'iconify-icon';
 
 const propertiesInOrder = ['basics', 'education', 'work', 'projects', 'sideProjects', 'skills', 'languages', 'interests', 'references', 'awards', 'publications', 'volunteer', 'certificates', 'meta']
 const basicsPropertiesInOrder = ['name', 'label', 'email', 'phone', 'url', 'summary', 'image', 'location', 'profiles']
@@ -264,3 +267,45 @@ $inputColorPicker.on('change', (e) => {
 const primaryColor = getPrimaryColor()
 $colorValue.text(primaryColor)
 $inputColorPicker.val(primaryColor)
+
+// BibTeX handling
+const $btnUploadBibTeX = $('#fn-upload-bibtex')
+const $btnDownloadBibTeX = $('#fn-download-bibtex')
+const $inputUploadBibTeX = $('input[name=upload-bibtex]')
+
+$btnUploadBibTeX.on('click', () => {
+  $inputUploadBibTeX.trigger('click')
+})
+
+$inputUploadBibTeX.on('change', async () => {
+  const files = $inputUploadBibTeX.get(0).files
+  if (files.length === 0) return
+
+  const reader = new FileReader()
+  reader.onload = async (e) => {
+    try {
+      const bibtexStr = e.target.result
+      const publications = await processBibTeX(bibtexStr)
+      const currentData = editor.getValue()
+      
+      // Get current mode from radio buttons
+      const shouldMerge = $('input[name="bibtex-mode"]:checked').val() === 'merge'
+      const newData = updatePublications(currentData, publications, shouldMerge)
+      editor.setValue(newData)
+    } catch (e) {
+      console.error('Error processing BibTeX:', e)
+      alert('Error processing BibTeX file. Please check the console for details.')
+    }
+  }
+
+  reader.readAsText(files[0])
+})
+
+$btnDownloadBibTeX.on('click', () => {
+  const bibtexStr = getLastBibTeX()
+  if (!bibtexStr) {
+    alert('No BibTeX data available. Please upload a BibTeX file first.')
+    return
+  }
+  downloadContent('references.bib', bibtexStr)
+})
