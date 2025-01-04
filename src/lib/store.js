@@ -34,7 +34,9 @@ export function savePrimaryColor(color) {
 }
 
 export function getPrimaryColor() {
-  return localStorage.getItem(storeKeys.primaryColor) || defaultPrimaryColor
+  const color = localStorage.getItem(storeKeys.primaryColor) || defaultPrimaryColor;
+  console.log('[Debug][Store] Getting primary color:', color);
+  return color;
 }
 
 export function saveBibTeX(content, filename) {
