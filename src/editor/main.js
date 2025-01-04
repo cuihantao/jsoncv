@@ -14,6 +14,8 @@ import {
   saveCVJSON,
   savePrimaryColor,
   savePageSize,
+  getTheme,
+  saveTheme,
 } from '../lib/store';
 import {
   createElement,
@@ -23,6 +25,7 @@ import {
   traverseDownObject,
 } from '../lib/utils';
 import { getCVTitle } from '../themes/data';
+import { getAvailableThemes, getThemeDefaultColor } from '../themes';
 import { registerIconLib } from './je-iconlib';
 import { registerTheme } from './je-theme';
 
@@ -135,6 +138,17 @@ editor.on('ready',() => {
     const schemapath = el.getAttribute('data-schemapath')
     el.id = schemapath
   })
+
+  // Initialize color picker from meta or localStorage
+  const initialData = editor.getValue()
+  const primaryColor = initialData.meta?.colorPrimary || getPrimaryColor()
+  $colorValue.text(primaryColor)
+  $inputColorPicker.val(primaryColor)
+
+  // Set initial theme from meta or storage
+  const initialTheme = initialData.meta?.theme || getTheme()
+  $themePicker.val(initialTheme)
+  saveTheme(initialTheme)  // Ensure storage is synced
 })
 
 function getEditorData() {
@@ -260,14 +274,54 @@ $btnPrintPreview.on('click', () => {
 
 $inputColorPicker.on('change', (e) => {
   const color = e.target.value
-  console.log('color', color)
-  $colorValue.text(color)
+  console.log('color changed to:', color)
+  
+  // Update both meta and localStorage
+  const editorData = editor.getValue()
+  if (!editorData.meta) editorData.meta = {}
+  editorData.meta.colorPrimary = color
+  editor.setValue(editorData)
   savePrimaryColor(color)
+  $colorValue.text(color)
 })
 
-const primaryColor = getPrimaryColor()
-$colorValue.text(primaryColor)
-$inputColorPicker.val(primaryColor)
+// Initialize theme picker
+const $themePicker = $('#fn-theme-picker')
+const themes = getAvailableThemes()
+themes.forEach(theme => {
+  const option = createElement('option', {
+    text: theme,
+    attrs: { value: theme }
+  })
+  $themePicker.append(option)
+})
+
+// Theme colors
+const themeColors = {
+  reorx: '#aaaaaa',
+  cuiv: '#cc0000'
+}
+
+// Handle theme changes
+$themePicker.on('change', (e) => {
+  const selectedTheme = e.target.value
+  console.log('theme changed to:', selectedTheme)
+  
+  // Update both theme and color in one operation
+  const editorData = editor.getValue()
+  if (!editorData.meta) editorData.meta = {}
+  editorData.meta.theme = selectedTheme
+  editorData.meta.colorPrimary = getThemeDefaultColor(selectedTheme)
+  
+  // Update editor and storage
+  editor.setValue(editorData)  // triggers preview refresh
+  saveTheme(selectedTheme)
+  savePrimaryColor(editorData.meta.colorPrimary)
+  
+  // Update color picker UI
+  $colorValue.text(editorData.meta.colorPrimary)
+  $inputColorPicker.val(editorData.meta.colorPrimary)
+})
 
 // BibTeX handling
 const $btnUploadBibTeX = $('#fn-upload-bibtex')

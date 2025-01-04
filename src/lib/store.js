@@ -2,6 +2,7 @@ const storeKeyCV = 'cv-data'
 const storeKeyCVSavedTime = 'cv-data-saved-time'
 const storeKeyPrimaryColor = 'primary-color'
 const storeKeyPageSize = 'page-size'
+const storeKeyTheme = 'theme'
 
 export function saveCVJSON(json) {
   localStorage.setItem(storeKeyCV, json)
@@ -32,4 +33,12 @@ export function savePageSize(size) {
 
 export function getPageSize() {
   return localStorage.getItem(storeKeyPageSize) || 'A4'
+}
+
+export function saveTheme(theme) {
+  localStorage.setItem(storeKeyTheme, theme)
+}
+
+export function getTheme() {
+  return localStorage.getItem(storeKeyTheme) || 'reorx'
 }
