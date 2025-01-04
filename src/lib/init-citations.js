@@ -9,29 +9,37 @@ import { getBibTeX } from './store';
  * @returns {boolean} - Whether the section was successfully rendered
  */
 function renderPublicationSection(container, title, publications) {
-  const h3Elements = Array.from(container.getElementsByTagName('h3'));
-  const sectionHeader = h3Elements.find(h3 => h3.textContent.trim() === title);
+  // Create section header if it doesn't exist
+  let sectionHeader = Array.from(container.getElementsByTagName('h3'))
+    .find(h3 => h3.textContent.trim() === title);
   
-  if (sectionHeader) {
-    const pubsContainer = sectionHeader.nextElementSibling;
-    if (pubsContainer?.classList.contains('publications')) {
-      console.log(`[Debug][Citations] Found ${title} section, updating with`, publications.length, 'publications');
-      pubsContainer.innerHTML = publications.map((item, index) => `
-        <div class="publication section-item">
-          <div class="citation">
-            <span class="number">[${index + 1}]</span>
-            <span class="text">
-              ${item.citation}
-              ${item.doi ? `<a href="https://doi.org/${item.doi}" target="_blank">[${item.doi}]</a>` : ''}
-            </span>
-          </div>
-        </div>
-      `).join('');
-      return true;
-    }
+  if (!sectionHeader) {
+    sectionHeader = document.createElement('h3');
+    sectionHeader.textContent = title;
+    container.appendChild(sectionHeader);
   }
-  console.log(`[Debug][Citations] Section ${title} not found or invalid structure`);
-  return false;
+
+  // Create or find publications container
+  let pubsContainer = sectionHeader.nextElementSibling;
+  if (!pubsContainer?.classList.contains('publications')) {
+    pubsContainer = document.createElement('div');
+    pubsContainer.className = 'publications';
+    sectionHeader.parentNode.insertBefore(pubsContainer, sectionHeader.nextSibling);
+  }
+
+  console.log(`[Debug][Citations] Updating ${title} section with ${publications.length} publications`);
+  pubsContainer.innerHTML = publications.map((item, index) => `
+    <div class="publication section-item">
+      <div class="citation">
+        <span class="number">[${index + 1}]</span>
+        <span class="text">
+          ${item.citation}
+          ${item.doi ? `<a href="https://doi.org/${item.doi}" target="_blank">[${item.doi}]</a>` : ''}
+        </span>
+      </div>
+    </div>
+  `).join('');
+  return true;
 }
 
 /**
@@ -63,14 +71,23 @@ export async function initializeCitations() {
     console.log('[Debug][Citations] Found publications section');
     
     // Group publications by type
-    const journalPubs = publications.filter(p => p.type === 'journal');
-    const confPubs = publications.filter(p => p.type === 'conference');
+    const journalPubs = publications.filter(p => p.type === 'article' || p.type === 'journal');
+    const confPubs = publications.filter(p => p.type === 'inproceedings' || p.type === 'conference');
+    const otherPubs = publications.filter(p => !journalPubs.includes(p) && !confPubs.includes(p));
     
     // Update each section
-    const journalSuccess = renderPublicationSection(pubsSection, 'Journal Articles', journalPubs);
-    const confSuccess = renderPublicationSection(pubsSection, 'Conference Papers', confPubs);
+    let success = false;
+    if (journalPubs.length > 0) {
+      success = renderPublicationSection(pubsSection, 'Journal Articles', journalPubs) || success;
+    }
+    if (confPubs.length > 0) {
+      success = renderPublicationSection(pubsSection, 'Conference Papers', confPubs) || success;
+    }
+    if (otherPubs.length > 0) {
+      success = renderPublicationSection(pubsSection, 'Other Publications', otherPubs) || success;
+    }
     
-    return journalSuccess || confSuccess;
+    return success;
   } catch (error) {
     console.error('[Debug][Citations] Failed to process BibTeX:', error);
     return false;
