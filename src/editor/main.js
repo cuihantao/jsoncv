@@ -13,6 +13,7 @@ import {
   getPrimaryColor,
   saveCVJSON,
   savePrimaryColor,
+  savePageSize,
 } from '../lib/store';
 import {
   createElement,
@@ -137,11 +138,7 @@ editor.on('ready',() => {
 })
 
 function getEditorData() {
-  const data = editor.getValue()
-  return {
-    data,
-    json: JSON.stringify(data, null, 2),
-  }
+  return editor.getValue()
 }
 
 const $outputJSON = $('.output-json')
@@ -150,12 +147,16 @@ const outputHTMLIframe = $outputHTML.get(0)
 
 // listen to change
 editor.on('change', () => {
-  console.log('on editor change')
-  const {json} = getEditorData()
+  const data = getEditorData()
+  const json = JSON.stringify(data, null, 2)
   $outputJSON.text(json)
 
   // save to localstorage
   saveCVJSON(json)
+  
+  // sync page size with localStorage
+  const pageSize = data.meta?.pageSize || 'A4'
+  savePageSize(pageSize)
 })
 
 // actions

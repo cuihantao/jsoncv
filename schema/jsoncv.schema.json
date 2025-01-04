@@ -538,6 +538,12 @@
         "lastModified": {
           "type": "string",
           "description": "Using ISO 8601 with YYYY-MM-DDThh:mm:ss"
+        },
+        "pageSize": {
+          "type": "string",
+          "description": "Page size for the CV (A4 or letter)",
+          "enum": ["A4", "letter"],
+          "default": "A4"
         }
       }
     }

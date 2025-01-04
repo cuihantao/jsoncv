@@ -2,6 +2,7 @@ import {
   getCVData,
   getCVSavedTime,
   getPrimaryColor,
+  getPageSize,
 } from '../lib/store';
 import { upsertStyleTag } from '../lib/utils';
 import cvBaseStyle from '../scss/cv-base.css?inline';
@@ -36,6 +37,9 @@ const restoreScrollPosition = () => {
 // Render CV
 const data = getCVData()
 if (data) {
+  // Set page size
+  const pageSize = data.meta?.pageSize || getPageSize()
+  document.documentElement.dataset.pageSize = pageSize.toLowerCase()
 
   upsertStyleTag('base-style', cvBaseStyle)
   renderThemeOn(themeName, elCV, data, getPrimaryColor())
