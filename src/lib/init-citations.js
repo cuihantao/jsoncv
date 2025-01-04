@@ -1,45 +1,117 @@
-import { processBibTeX } from './citations';
+import { processBibTeX, onPublicationsUpdated } from './citations';
 import { getBibTeX } from './store';
 
 /**
- * Render a publications section with the given publications
- * @param {HTMLElement} container - The container element
- * @param {string} title - Section title (e.g., "Journal Articles")
+ * Render publications into the DOM
  * @param {Array} publications - List of publications to render
- * @returns {boolean} - Whether the section was successfully rendered
+ * @returns {boolean} - Whether rendering was successful
  */
-function renderPublicationSection(container, title, publications) {
-  // Create section header if it doesn't exist
-  let sectionHeader = Array.from(container.getElementsByTagName('h3'))
-    .find(h3 => h3.textContent.trim() === title);
+function renderPublications(publications) {
+  // Find the Publications heading at any level
+  console.log('[Debug][Citations] Looking for Publications heading...');
+  const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  console.log('[Debug][Citations] Found', headings.length, 'headings');
   
-  if (!sectionHeader) {
-    sectionHeader = document.createElement('h3');
-    sectionHeader.textContent = title;
-    container.appendChild(sectionHeader);
-  }
+  for (const heading of headings) {
+    console.log('[Debug][Citations] Checking heading:', heading.tagName, heading.textContent.trim());
+    if (heading.textContent.trim() === 'Publications') {
+      console.log('[Debug][Citations] Found Publications heading');
+      
+      // Find the section container
+      const section = heading.closest('.publications-section');
+      if (!section) {
+        console.warn('[Debug][Citations] Could not find publications section');
+        return false;
+      }
 
-  // Create or find publications container
-  let pubsContainer = sectionHeader.nextElementSibling;
-  if (!pubsContainer?.classList.contains('publications')) {
-    pubsContainer = document.createElement('div');
-    pubsContainer.className = 'publications';
-    sectionHeader.parentNode.insertBefore(pubsContainer, sectionHeader.nextSibling);
-  }
+      // Clear existing publications but preserve the heading and note
+      const existingContent = Array.from(section.children);
+      existingContent.forEach(child => {
+        if (!child.classList.contains('section-title') && !child.classList.contains('note')) {
+          child.remove();
+        }
+      });
 
-  console.log(`[Debug][Citations] Updating ${title} section with ${publications.length} publications`);
-  pubsContainer.innerHTML = publications.map((item, index) => `
-    <div class="publication section-item">
-      <div class="citation">
-        <span class="number">[${index + 1}]</span>
-        <span class="text">
-          ${item.citation}
-          ${item.doi ? `<a href="https://doi.org/${item.doi}" target="_blank">[${item.doi}]</a>` : ''}
-        </span>
-      </div>
-    </div>
-  `).join('');
-  return true;
+      // Group by type
+      const journalPubs = publications.filter(p => p.type === 'article' || p.type === 'journal');
+      const confPubs = publications.filter(p => p.type === 'inproceedings' || p.type === 'conference');
+      const otherPubs = publications.filter(p => 
+        !['article', 'journal', 'inproceedings', 'conference'].includes(p.type)
+      );
+
+      console.log('[Debug][Citations] Publication counts - Journals:', journalPubs.length, 
+                 'Conferences:', confPubs.length, 'Others:', otherPubs.length);
+
+      // Render each section
+      if (journalPubs.length > 0) {
+        const h3 = document.createElement('h3');
+        h3.textContent = 'Journal Articles';
+        section.appendChild(h3);
+
+        const div = document.createElement('div');
+        div.className = 'publications';
+        div.innerHTML = journalPubs.map((item, index) => `
+          <div class="publication section-item">
+            <div class="citation">
+              <span class="number">[${index + 1}]</span>
+              <span class="text">
+                ${item.citation}
+                ${item.doi ? `<a href="https://doi.org/${item.doi}" target="_blank">[${item.doi}]</a>` : ''}
+              </span>
+            </div>
+          </div>
+        `).join('');
+        section.appendChild(div);
+      }
+
+      if (confPubs.length > 0) {
+        const h3 = document.createElement('h3');
+        h3.textContent = 'Conference Papers';
+        section.appendChild(h3);
+
+        const div = document.createElement('div');
+        div.className = 'publications';
+        div.innerHTML = confPubs.map((item, index) => `
+          <div class="publication section-item">
+            <div class="citation">
+              <span class="number">[${index + 1}]</span>
+              <span class="text">
+                ${item.citation}
+                ${item.doi ? `<a href="https://doi.org/${item.doi}" target="_blank">[${item.doi}]</a>` : ''}
+              </span>
+            </div>
+          </div>
+        `).join('');
+        section.appendChild(div);
+      }
+
+      if (otherPubs.length > 0) {
+        const h3 = document.createElement('h3');
+        h3.textContent = 'Other Publications';
+        section.appendChild(h3);
+
+        const div = document.createElement('div');
+        div.className = 'publications';
+        div.innerHTML = otherPubs.map((item, index) => `
+          <div class="publication section-item">
+            <div class="citation">
+              <span class="number">[${index + 1}]</span>
+              <span class="text">
+                ${item.citation}
+                ${item.doi ? `<a href="https://doi.org/${item.doi}" target="_blank">[${item.doi}]</a>` : ''}
+              </span>
+            </div>
+          </div>
+        `).join('');
+        section.appendChild(div);
+      }
+
+      console.log('[Debug][Citations] Successfully rendered publications');
+      return true;
+    }
+  }
+  console.warn('[Debug][Citations] Publications heading not found');
+  return false;
 }
 
 /**
@@ -49,45 +121,23 @@ function renderPublicationSection(container, title, publications) {
 export async function initializeCitations() {
   console.log('[Debug][Citations] Starting initialization...');
   
-  // Get BibTeX content from store (which handles both injected and localStorage content)
+  // Set up publications update listener
+  onPublicationsUpdated(async (publications) => {
+    console.log('[Debug][Citations] Received publications update:', publications.length);
+    return renderPublications(publications);
+  });
+  
+  // Initial render from stored BibTeX
   const bibtexContent = getBibTeX();
   if (!bibtexContent) {
     console.warn('[Debug][Citations] No BibTeX content available');
     return false;
   }
 
-  console.log('[Debug][Citations] Found BibTeX content, processing...');
   try {
     const publications = await processBibTeX(bibtexContent);
-    console.log('[Debug][Citations] Processed publications:', publications.length);
-    
-    // Find and update the publications section
-    const pubsSection = document.querySelector('.publications-section');
-    if (!pubsSection) {
-      console.warn('[Debug][Citations] Publications section not found');
-      return false;
-    }
-
-    console.log('[Debug][Citations] Found publications section');
-    
-    // Group publications by type
-    const journalPubs = publications.filter(p => p.type === 'article' || p.type === 'journal');
-    const confPubs = publications.filter(p => p.type === 'inproceedings' || p.type === 'conference');
-    const otherPubs = publications.filter(p => !journalPubs.includes(p) && !confPubs.includes(p));
-    
-    // Update each section
-    let success = false;
-    if (journalPubs.length > 0) {
-      success = renderPublicationSection(pubsSection, 'Journal Articles', journalPubs) || success;
-    }
-    if (confPubs.length > 0) {
-      success = renderPublicationSection(pubsSection, 'Conference Papers', confPubs) || success;
-    }
-    if (otherPubs.length > 0) {
-      success = renderPublicationSection(pubsSection, 'Other Publications', otherPubs) || success;
-    }
-    
-    return success;
+    console.log('[Debug][Citations] Processing initial publications:', publications.length);
+    return renderPublications(publications);
   } catch (error) {
     console.error('[Debug][Citations] Failed to process BibTeX:', error);
     return false;
