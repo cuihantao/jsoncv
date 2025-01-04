@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Online editor jsoncv with bibtex support.">
+<meta property="og:title" content="jsoncv Editor">
+<meta property="og:description" content="Online editor jsoncv with bibtex support.">
+<meta property="og:type" content="website">
+
+  <meta property="og:url" content="https://cui.eecps.com/jsoncv/editor/">
+  <link rel="canonical" href="https://cui.eecps.com/jsoncv/editor/" />
+
+
+  <meta name="twitter:card" property="twitter:card" content="summary">
+  <meta name="twitter:creator" property="twitter:creator" content="@novoreorx">
+  <meta name="twitter:title" property="twitter:title" content="jsoncv Editor">
+  <meta name="twitter:description" property="twitter:description" content="Online editor jsoncv with bibtex support.">
+
+
+
+  <title>JSONCV Editor</title>
+  <link rel="shortcut icon" href="../favicon.png" type="image/png">
+  
+  <script type="module" crossorigin src="/jsoncv/assets/editor-96aa840b.js"></script>
+  <link rel="modulepreload" crossorigin href="/jsoncv/assets/citations-e0558ba9.js">
+  <link rel="stylesheet" href="/jsoncv/assets/index-5a2027f3.css">
+</head>
+<body>
+  <div class="container">
+    <div id="main">
+      <div class="sidebar column">
+        <div class="logo">
+          <a href="../"><span class="t-jsoncv"><span class="t-json">JSON</span>CV</span></a>
+          <div style="padding: 2px 5px;">Editor</div>
+        </div>
+        <div class="editor-toc"></div>
+        <div class="app-actions">
+          <label for="fn-color-picker" class="color-picker">
+            <div>Primary color</div>
+            <div class="color-area">
+              <input type="color" id="fn-color-picker">
+              <span class="value">#aaaaaa</span>
+            </div>
+          </label>
+          <button id="fn-toggle-preview">Preview/JSON</button>
+          <button id="fn-download-json">Download JSON</button>
+          <button id="fn-download-bibtex">Download BibTeX</button>
+          <button id="fn-download-html">Download HTML</button>
+          <button onclick="dialog.showModal()">PDF?</button>
+          <button id="fn-new-data" class="-green">New Data</button>
+          <button id="fn-upload-data" class="-green">Upload JSON CV</button>
+          <input type="file" name="upload-data" style="display: none;">
+          <button id="fn-upload-bibtex" class="-green">Upload BibTeX</button>
+          <input type="file" name="upload-bibtex" accept=".bib" style="display: none;">
+          <button id="fn-load-sample" class="-green">Load Sample</button>
+
+        </div>
+      </div>
+      <div class="middle column editor-container"></div>
+      <div class="right column">
+        <div class="output-json code-block" style="display: none;"></div>
+        <iframe class="output-html" src="../preview/" frameborder="0"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="dialog">
+    <form method="dialog">
+      <p>The HTML that JSONCV generates is optimized for printing in an A4 letter, so it can be used to create a well-formatted PDF document.</p>
+      <p>You can first click "Download HTML", then open the HTML in a browser and choose "Print" from the menu (or press ⌘+P), it will open a modal where you should find the option to save it as a PDF.</p>
+      <p>For browser selection, Chrome's PDF has a better rendering effect, while Firefox's PDF is smaller and has better support for copying text, choose according to your needs.</p>
+      <button>OK</button>
+      <p>You can directly open the print dialog for the preview by clicking the button below:</p>
+      <button id="fn-print-preview">Print the preview</button>
+    </form>
+  </dialog>
+
+  
+</body>
+</html>
