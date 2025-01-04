@@ -32,124 +32,222 @@ import { registerTheme } from './je-theme';
 // Load iconify last as it's optional for UI
 import 'iconify-icon';
 
-const propertiesInOrder = ['basics', 'education', 'work', 'projects', 'sideProjects', 'skills', 'languages', 'interests', 'references', 'awards', 'publications', 'volunteer', 'certificates', 'meta']
-const basicsPropertiesInOrder = ['name', 'label', 'email', 'phone', 'url', 'summary', 'image', 'location', 'profiles']
-
 // toc elements
 const elToc = document.querySelector('.editor-toc')
-const tocUl = createElement('ul', {
-  parent: elToc
-})
-const basicsUl = createElement('ul', {
-  parent: tocUl
-})
-
-
-// copy the object to remove the readonly restriction on module
-const jsoncvSchema = {...jsoncvSchemaModule.default}
-
-// add propertyOrder to schema, and add links to toc
-propertiesInOrder.forEach((name, index) => {
-  jsoncvSchema.properties[name].propertyOrder = index
-
-  const li = createElement('li', {parent: tocUl})
-  createElement('a', {
-    text: name,
-    attrs: {
-      href: `#root.${name}`
-    },
-    parent: li,
-  })
-
-  if (name === 'basics') {
-    li.appendChild(basicsUl)
-  }
-})
-basicsPropertiesInOrder.forEach((name, index) => {
-  jsoncvSchema.properties.basics.properties[name].propertyOrder = index
-  // only add location and profiles to basics toc
-  if (!['location', 'profiles'].includes(name)) return
-  const li = createElement('li', {parent: basicsUl})
-  createElement('a', {
-    text: name,
-    attrs: {
-      href: `#root.basics.${name}`
-    },
-    parent: li,
-  })
-})
-
-// add headerTemplate for each type:array in schema
-traverseDownObject(jsoncvSchema, (key, obj) => {
-  let noun = key
-  if (noun.endsWith('s')) noun = noun.slice(0, -1)
-  if (obj.type === 'array' && obj.items) {
-    obj.items.headerTemplate = `${noun} {{i1}}`
-  }
-})
-
-// add format to schema
-const keyFormatMap = {
-  'basics.properties.summary': 'textarea',
-  'work.items.properties.description': 'textarea',
-  'work.items.properties.summary': 'textarea',
-  'work.items.properties.highlights.items': 'textarea',
-  'projects.items.properties.description': 'textarea',
-  'projects.items.properties.highlights.items': 'textarea',
-  'sideProjects.items.properties.description': 'textarea',
-  'skills.items.properties.summary': 'textarea',
-  'languages.items.properties.summary': 'textarea',
-  'references.items.properties.reference': 'textarea',
-  'awards.items.properties.summary': 'textarea',
-  'publications.items.properties.summary': 'textarea',
-  'volunteer.items.properties.summary': 'textarea',
-  'volunteer.items.properties.highlights.items': 'textarea',
-}
-for (const [key, format] of Object.entries(keyFormatMap)) {
-  objectPath.get(jsoncvSchema.properties, key).format = format
-}
-
-// change schema title
-jsoncvSchema.title = 'CV Schema'
-
-// change some descriptions
-jsoncvSchema.properties.meta.properties.lastModified.description += '. This will be automatically updated when downloading.'
-
+const tocUl = createElement('ul', { parent: elToc })
+const basicsUl = createElement('ul', { parent: tocUl })
 
 // init data
 let data = getCVData()
 if (!data) data = sampleModule.default
+console.log('Initial data:', data)
 
-// initialize editor
-registerTheme(JSONEditor)
-registerIconLib(JSONEditor)
-const elEditorContainer = document.querySelector('.editor-container')
-const editor = new JSONEditor(elEditorContainer, {
-  schema: jsoncvSchema,
-  theme: 'mytheme',
-  iconlib: 'myiconlib',
-  disable_array_delete_all_rows: true,
-  no_additional_properties: true,
-  startval: data,
-});
-editor.on('ready',() => {
-  // add anchor to each schema element
-  document.querySelectorAll('[data-schemapath]').forEach(el => {
-    const schemapath = el.getAttribute('data-schemapath')
-    el.id = schemapath
+// Initialize editor with schema and data
+async function initializeEditor() {
+  // Get schema (remote or local)
+  let schema
+  if (data.$schema) {
+    try {
+      console.log('Fetching schema from:', data.$schema)
+      const response = await fetch(data.$schema)
+      schema = await response.json()
+      console.log('Fetched schema:', schema)
+    } catch (error) {
+      console.error('Error fetching schema:', error)
+      console.log('Falling back to local schema')
+      schema = {...jsoncvSchemaModule.default}
+    }
+  } else {
+    schema = {...jsoncvSchemaModule.default}
+  }
+
+  // Validate schema structure
+  if (!schema || !schema.properties) {
+    console.error('Invalid schema structure:', schema)
+    console.log('Falling back to local schema')
+    schema = {...jsoncvSchemaModule.default}
+  }
+
+  console.log('Initial schema:', schema)
+
+  // Add property order and build TOC
+  const excludeFromTOC = ['$schema', 'sideProjects', 'languages', 'interests']
+  
+  Object.keys(schema.properties).forEach((name, index) => {
+    // Add order
+    schema.properties[name].propertyOrder = index
+    
+    // Skip excluded sections in TOC
+    if (excludeFromTOC.includes(name)) {
+      return
+    }
+    
+    // Create TOC entry
+    const li = createElement('li', { parent: tocUl })
+    createElement('a', {
+      text: name,
+      attrs: { href: `#root.${name}` },
+      parent: li,
+    })
+
+    // Special handling for basics section
+    if (name === 'basics' && schema.properties[name].properties) {
+      // only add location and profiles to basics toc
+      ['location', 'profiles'].forEach(subName => {
+        if (schema.properties[name].properties[subName]) {
+          const subLi = createElement('li', { parent: basicsUl })
+          createElement('a', {
+            text: subName,
+            attrs: { href: `#root.basics.${subName}` },
+            parent: subLi,
+          })
+        }
+      })
+      li.appendChild(basicsUl)
+    }
   })
 
-  // Initialize color picker from meta or localStorage
-  const initialData = editor.getValue()
-  const primaryColor = initialData.meta?.colorPrimary || getPrimaryColor()
-  $colorValue.text(primaryColor)
-  $inputColorPicker.val(primaryColor)
+  // Add headerTemplate for arrays
+  traverseDownObject(schema, (key, obj) => {
+    let noun = key
+    if (noun.endsWith('s')) noun = noun.slice(0, -1)
+    if (obj.type === 'array' && obj.items) {
+      obj.items.headerTemplate = `${noun} {{i1}}`
+    }
+  })
 
-  // Set initial theme from meta or storage
-  const initialTheme = initialData.meta?.theme || getTheme()
-  $themePicker.val(initialTheme)
-  saveTheme(initialTheme)  // Ensure storage is synced
-})
+  // Add format to schema
+  const keyFormatMap = {
+    // Basic fields
+    'basics.properties.summary': 'textarea',
+
+    // Work and projects
+    'work.items.properties': {
+      'description': 'textarea',
+      'summary': 'textarea',
+      'highlights.items': 'textarea'
+    },
+    'projects.items.properties': {
+      'description': 'textarea',
+      'highlights.items': 'textarea'
+    },
+    'sideProjects.items.properties.description': 'textarea',
+
+    // Skills and qualifications
+    'skills.items.properties.summary': 'textarea',
+    'languages.items.properties.summary': 'textarea',
+    'references.items.properties.reference': 'textarea',
+
+    // Awards and recognition
+    'awards.items.properties.summary': 'textarea',
+    'publications.items.properties.summary': 'textarea',
+    'volunteer.items.properties': {
+      'summary': 'textarea',
+      'highlights.items': 'textarea'
+    },
+
+    // Academic fields
+    'researchAreas.items.properties': {
+      'description': 'textarea',
+      'contributions.items': 'textarea'
+    },
+    'academicAppointments.items.properties.summary': 'textarea',
+    'teaching.items.properties.description': 'textarea',
+    'grants.items.properties.summary': 'textarea',
+    'mentoring.items.properties.summary': 'textarea',
+    'professionalServices.items.properties.details': 'textarea',
+    'presentations.items.properties.description': 'textarea',
+    'software.items.properties.description': 'textarea'
+  }
+
+  // Process nested format mappings
+  for (const [key, value] of Object.entries(keyFormatMap)) {
+    if (typeof value === 'string') {
+      // Direct format mapping
+      const property = objectPath.get(schema.properties, key)
+      if (property) {
+        property.format = value
+        console.log(`Added format ${value} to ${key}`)
+      } else {
+        console.warn(`Property path ${key} not found in schema`)
+      }
+    } else {
+      // Nested format mappings
+      for (const [subKey, format] of Object.entries(value)) {
+        const fullKey = `${key}.${subKey}`
+        const property = objectPath.get(schema.properties, fullKey)
+        if (property) {
+          property.format = format
+          console.log(`Added format ${format} to ${fullKey}`)
+        } else {
+          console.warn(`Property path ${fullKey} not found in schema`)
+        }
+      }
+    }
+  }
+
+  // Set schema title and update descriptions
+  schema.title = 'CV Schema'
+  if (schema.properties.meta?.properties?.lastModified) {
+    schema.properties.meta.properties.lastModified.description += '. This will be automatically updated when downloading.'
+  }
+
+  console.log('Final schema after processing:', schema)
+
+  // Initialize editor
+  registerTheme(JSONEditor)
+  registerIconLib(JSONEditor)
+  const elEditorContainer = document.querySelector('.editor-container')
+  const editor = new JSONEditor(elEditorContainer, {
+    schema: schema,
+    theme: 'mytheme',
+    iconlib: 'myiconlib',
+    disable_array_delete_all_rows: true,
+    no_additional_properties: true,
+    startval: data,
+  });
+
+  return editor;
+}
+
+// Initialize the editor
+let editor;
+initializeEditor().then(e => {
+  editor = e;
+  // Add ready handler
+  editor.on('ready',() => {
+    // add anchor to each schema element
+    document.querySelectorAll('[data-schemapath]').forEach(el => {
+      const schemapath = el.getAttribute('data-schemapath')
+      el.id = schemapath
+    })
+
+    // Initialize color picker from meta or localStorage
+    const initialData = editor.getValue()
+    const primaryColor = initialData.meta?.colorPrimary || getPrimaryColor()
+    $colorValue.text(primaryColor)
+    $inputColorPicker.val(primaryColor)
+
+    // Set initial theme from meta or storage
+    const initialTheme = initialData.meta?.theme || getTheme()
+    $themePicker.val(initialTheme)
+    saveTheme(initialTheme)  // Ensure storage is synced
+  });
+
+  // Add change handler
+  editor.on('change', () => {
+    const data = editor.getValue()
+    const json = JSON.stringify(data, null, 2)
+    $outputJSON.text(json)
+
+    // save to localstorage
+    saveCVJSON(json)
+    
+    // sync page size with localStorage
+    const pageSize = data.meta?.pageSize || 'A4'
+    savePageSize(pageSize)
+  });
+});
 
 function getEditorData() {
   return editor.getValue()
@@ -158,20 +256,6 @@ function getEditorData() {
 const $outputJSON = $('.output-json')
 const $outputHTML = $('.output-html')
 const outputHTMLIframe = $outputHTML.get(0)
-
-// listen to change
-editor.on('change', () => {
-  const data = getEditorData()
-  const json = JSON.stringify(data, null, 2)
-  $outputJSON.text(json)
-
-  // save to localstorage
-  saveCVJSON(json)
-  
-  // sync page size with localStorage
-  const pageSize = data.meta?.pageSize || 'A4'
-  savePageSize(pageSize)
-})
 
 // actions
 const $btnTogglePreview = $('#fn-toggle-preview')
