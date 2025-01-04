@@ -4,7 +4,7 @@ import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import fs from 'fs';
 
-import { TransformEjs } from './src/lib/vite-plugins';
+import { TransformEjs, InjectBibTeX } from './src/lib/vite-plugins';
 import { getRenderData } from './src/themes/data';
 
 const dataFilename = process.env.DATA_FILENAME || './sample.cv.prof.json'
@@ -47,31 +47,7 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.bib'],  // Include .bib files as assets
   plugins: [
-    {
-      name: 'inject-bibtex',
-      transformIndexHtml(html) {
-        // Inject BibTeX content as a global variable before any other scripts
-        return html.replace(
-          '<head>',
-          `<head>
-          <script>
-            // Make BibTeX content available globally
-            window.__BIBTEX_CONTENT__ = ${JSON.stringify(bibContent)};
-            window.__BIBTEX_FILENAME__ = ${JSON.stringify(bibFilename)};
-            
-            // Initialize localStorage if available
-            if (typeof window === 'object' && window.localStorage) {
-              try {
-                localStorage.setItem('bibTeX', window.__BIBTEX_CONTENT__);
-                localStorage.setItem('bibFileName', window.__BIBTEX_FILENAME__);
-              } catch (error) {
-                console.warn('[Debug][Init] Failed to initialize localStorage:', error);
-              }
-            }
-          </script>`
-        )
-      }
-    },
+    InjectBibTeX(bibContent, bibFilename),
     TransformEjs(),
     ViteEjsPlugin(
       renderData,
