@@ -241,7 +241,9 @@ function date(item, level) {
         </div>
       <% } %>
       <div class="publisher row subtitle">
-        <%= item.publisher %><% if (item.releaseDate) { %>, <%= fn.reformatDate(item.releaseDate, 'YYYY') %><% } %>
+        <% if (item.venue || item.releaseDate) { %>
+          <%= item.venue %><%= item.releaseDate ? (item.venue ? ', ' : '') + fn.reformatDate(item.releaseDate, 'YYYY') : '' %>
+        <% } %>
       </div>
       <%- linkInDiv(item.url) %>
       <% if (item.summary) { %>

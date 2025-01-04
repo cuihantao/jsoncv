@@ -24,7 +24,7 @@ export async function processBibTeX(bibtexStr) {
     
     const pub = {
       name: entry.title,
-      publisher: entry.publisher || '',
+      venue: entry['container-title'] || entry.journal || '',
       releaseDate: entry.issued?.['date-parts']?.[0]?.[0]?.toString() || '',
       url: entry.DOI ? `https://doi.org/${entry.DOI}` : entry.URL || '',
       summary: entry.abstract || '',

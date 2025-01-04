@@ -380,12 +380,15 @@ function date(item, level) {
     <div class="item">
       <div class="title"><%= pub.name %></div>
       <% if (pub.authors?.length) { %>
+        <% console.log('[Debug] Template rendering authors:', pub.authors) %>
         <div class="authors">
           <%= pub.authors.join('; ') %>
         </div>
       <% } %>
       <div class="publisher">
-        <%= pub.publisher %><% if (pub.releaseDate) { %>, <%= fn.reformatDate(pub.releaseDate, 'YYYY') %><% } %>
+        <% if (pub.venue || pub.releaseDate) { %>
+          <%= pub.venue %><%= pub.releaseDate ? (pub.venue ? ', ' : '') + fn.reformatDate(pub.releaseDate, 'YYYY') : '' %>
+        <% } %>
       </div>
       <% if (pub.summary) { %>
         <div class="summary"><%- fn.renderMarkdown(pub.summary) %></div>
