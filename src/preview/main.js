@@ -22,7 +22,6 @@ const onScroll = () => {
 let onScrollTimer
 window.addEventListener("scroll", () => {
   if (onScrollTimer) clearTimeout(onScrollTimer)
-
   onScrollTimer = setTimeout(onScroll, 50);
 }, false)
 
@@ -34,9 +33,7 @@ const restoreScrollPosition = () => {
 }
 
 // Render CV
-const data = getCVData()
-if (data) {
-
+async function renderCV(data) {
   upsertStyleTag('base-style', cvBaseStyle)
   renderThemeOn(themeName, elCV, data, getPrimaryColor())
 
@@ -46,20 +43,16 @@ if (data) {
   restoreScrollPosition()
 }
 
+// Initial render
+const data = getCVData()
+if (data) {
+  renderCV(data)
+}
+
 // Listen for updates from editor
-window.addEventListener('message', (event) => {
+window.addEventListener('message', async (event) => {
   if (event.data.type === 'update') {
     const newData = event.data.data
-    renderThemeOn(themeName, elCV, newData, getPrimaryColor())
+    await renderCV(newData)
   }
 }, false)
-
-const savedTime = getCVSavedTime()
-console.log('preview loaded', Date.now())
-
-const interval = setInterval(() => {
-  if (savedTime != getCVSavedTime()) {
-    clearInterval(interval)
-    location.reload()
-  }
-}, 1000)

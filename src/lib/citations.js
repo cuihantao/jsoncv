@@ -11,6 +11,12 @@ const publicationEvents = new EventTarget()
 // Event types
 export const PUBLICATIONS_UPDATED = 'publications-updated'
 
+// Add event verification
+publicationEvents.addEventListener(PUBLICATIONS_UPDATED, (event) => {
+  console.log('[Debug][Citations] Publication update event fired:', 
+              event.detail.publications.length, 'publications');
+});
+
 // Configuration for name processing
 const nameConfig = {
   owner: '',
@@ -31,6 +37,7 @@ let processedNameConfig = {
 
 // Publication state
 let currentPublications = []
+let currentBibTeX = null
 
 // Register plugins and initialize
 console.log('[Debug][Citations] Registering plugins...')
@@ -364,8 +371,9 @@ export async function processBibTeX(bibtexContent) {
       return []
     }
 
-    // Save to localStorage for persistence
+    // Save to localStorage and update current state
     saveBibTeX(bibtexContent)
+    currentBibTeX = bibtexContent
     
     // Get CV data for name highlighting
     const cvData = getCVData()
@@ -468,7 +476,7 @@ export function getCurrentPublications() {
 }
 
 export function getCurrentBibTeX() {
-  return currentBibTeX
+  return currentBibTeX || getBibTeX()
 }
 
 /**
@@ -493,3 +501,9 @@ export function loadBibTeX() {
 
 // Replace the old loadSampleBibTeX with the new loadBibTeX function
 export const loadSampleBibTeX = loadBibTeX 
+
+// Add initialization for currentBibTeX
+export function initializeBibTeXState() {
+  currentBibTeX = getBibTeX()
+  return currentBibTeX
+} 

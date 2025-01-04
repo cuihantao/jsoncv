@@ -1,16 +1,43 @@
 <script type="module">
   import { initializeCitations } from '@/lib/init-citations.js';
   
-  // Initialize citations when the page loads
-  window.addEventListener('DOMContentLoaded', async () => {
-    console.log('[Debug][Template] DOM loaded, initializing citations...');
-    try {
-      const success = await initializeCitations();
-      console.log('[Debug][Template] Citations initialization:', success ? 'successful' : 'failed');
-    } catch (error) {
-      console.error('[Debug][Template] Failed to initialize citations:', error);
+  function tryInitialize() {
+    console.log('[Debug][Template] Trying to initialize...');
+    const section = document.querySelector('.publications-section');
+    if (!section) {
+      console.log('[Debug][Template] Publications section not ready, retrying...');
+      setTimeout(tryInitialize, 100);
+      return;
     }
+    console.log('[Debug][Template] Found publications section:', {
+      id: section.id,
+      children: section.children.length,
+      html: section.innerHTML.substring(0, 100)
+    });
+    
+    initializeCitations().then(result => {
+      console.log('[Debug][Template] Initialization completed:', {
+        result,
+        sectionAfter: document.querySelector('.publications-section')?.children.length
+      });
+    }).catch(error => {
+      console.error('[Debug][Template] Initialization failed:', error);
+    });
+  }
+
+  // Try both DOMContentLoaded and load events
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log('[Debug][Template] DOMContentLoaded fired');
+    tryInitialize();
   });
+  
+  window.addEventListener('load', () => {
+    console.log('[Debug][Template] Load event fired');
+    tryInitialize();
+  });
+
+  // Start initial attempt
+  tryInitialize();
 </script>
 
 <%

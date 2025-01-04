@@ -7,6 +7,27 @@
 <body>
   <div class="cv-container"></div>
 
+  <script type="module">
+    import { initializeCitations } from '../lib/init-citations.js';
+    
+    // Initialize citations when the preview loads or updates
+    async function initializePreview() {
+      try {
+        await initializeCitations();
+      } catch (error) {
+        console.error('Failed to initialize citations:', error);
+      }
+    }
+
+    // Initialize on load and updates
+    window.addEventListener('DOMContentLoaded', initializePreview);
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'update') {
+        initializePreview();
+      }
+    });
+  </script>
+
   <script src="main.js" type="module"></script>
 </body>
 </html>
