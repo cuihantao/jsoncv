@@ -44,6 +44,13 @@ $lh-p: 1.3;
   --print-margin-right: 0.5in;
 }
 
+// Mobile-specific adjustments
+@media screen and (max-width: 800px) {
+  :root {
+    --content-indent: 2em;  // 20% of desktop indentation (10em)
+  }
+}
+
 // Add print-specific styles at the top level
 @page {
   size: letter;  // Set to US Letter size
