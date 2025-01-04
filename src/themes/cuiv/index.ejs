@@ -232,32 +232,16 @@ function date(item, level) {
   </div>
   <% for (const item of cv.publications) { %>
     <div class="publication section-item">
-      <div class="citation">
-        <div class="number"><%= cv.publications.indexOf(item) + 1 %>.</div>
-        <div class="text">
-          <% if (item.name) { %>
-            <div class="title"><%= item.name %></div>
-          <% } %>
-          <% if (item.authors?.length) { %>
-            <div class="authors">
-              <%= item.authors.map(a => `${a.lastName}${a.firstName ? `, ${a.firstName}` : ''}`).join('; ') %>
-            </div>
-          <% } %>
-          <% if (item.publisher) { %>
-            <div class="publisher"><%= item.publisher %></div>
-          <% } %>
-          <% if (item.releaseDate) { %>
-            <div class="date"><%= fn.reformatDate(item.releaseDate) %></div>
-          <% } %>
-          <% if (item.abstract) { %>
-            <div class="abstract"><%- fn.renderMarkdown(item.abstract) %></div>
-          <% } %>
-          <% if (item.doi) { %>
-            <div class="doi">doi.org/<%= item.doi %></div>
-          <% } %>
-        </div>
+      <div class="row">
+        <h3><%= item.name %></h3>
+      </div>
+      <div class="publisher row subtitle">
+        <%= item.publisher %><% if (item.releaseDate) { %>, <%= fn.reformatDate(item.releaseDate, 'YYYY') %><% } %>
       </div>
       <%- linkInDiv(item.url) %>
+      <% if (item.summary) { %>
+        <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
+      <% } %>
     </div>
   <% } %>
 </section>

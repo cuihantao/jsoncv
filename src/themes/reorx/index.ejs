@@ -383,12 +383,9 @@ function date(item, level) {
           <%= pub.authors.map(a => `${a.lastName}${a.firstName ? `, ${a.firstName}` : ''}`).join('; ') %>
         </div>
       <% } %>
-      <% if (pub.publisher) { %>
-        <div class="publisher"><%= pub.publisher %></div>
-      <% } %>
-      <% if (pub.releaseDate) { %>
-        <div class="date"><%= fn.reformatDate(pub.releaseDate) %></div>
-      <% } %>
+      <div class="publisher">
+        <%= pub.publisher %><% if (pub.releaseDate) { %>, <%= fn.reformatDate(pub.releaseDate, 'YYYY') %><% } %>
+      </div>
       <% if (pub.summary) { %>
         <div class="summary"><%- fn.renderMarkdown(pub.summary) %></div>
       <% } %>
