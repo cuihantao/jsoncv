@@ -1,43 +1,87 @@
 /* Naming convention: https://ricostacruz.com/rscss/ */
 
+// Colors
+$color-black: #000;
 $color-text-dim: #777;
 $color-text-dimmer: #999;
 $color-border-dim: #aaa;
 $color-border-dimmer: #ccc;
-$fz-1: 28px;
-$fz-2: 18px;
+
+// Font sizes
+$fz-1: 32px;
+$fz-2: 20px;
 $fz-3: 16px;
 $fz-4: 14px;
+$fz-5: 13px;
+$fz-6: 12px;
 $lh-p: 1.3;
 
-// TODO: is this redundant since we export defaultColor in the js?
+// Layout system
 :root {
-  // overide `--color-primary` in your own css
-  --color-primary: #cc0000;
+  // Default color that can be overridden by meta.colorPrimary
+  --color-primary: #aaa;
+  
+  // Time display properties
+  --time-color: #{$color-black};
+  --time-font-style: italic;
+  --time-min-width: 7em;
+  --time-text-align: right;
+  --time-content-ratio: 75%;
+  
+  // Spacing system
+  --content-indent: 10em;      // Left indentation for content
+  --content-padding: 1em;      // Right padding for content
+  --section-gap-large: 1.2em;  // Large gaps between sections
+  --section-gap-medium: 1em;   // Medium gaps for major subsections
+  --section-gap: 0.8em;        // Normal gaps between sections
+  --section-gap-small: 0.4em;  // Small gaps between items
+  --section-gap-tiny: 0.2em;   // Tiny gaps for tight spacing
+  
+  // Print settings
+  --print-margin-top: 0.5in;    // Standard Letter margins
+  --print-margin-bottom: 0.5in;
+  --print-margin-left: 0.5in;
+  --print-margin-right: 0.5in;
 }
+
+// Mobile-specific adjustments
+@media screen and (max-width: 800px) {
+  :root {
+    --content-indent: 2em;  // 20% of desktop indentation (10em)
+  }
+}
+
+// Add print-specific styles at the top level
+@page {
+  size: letter;  // Set to US Letter size
+  margin: var(--print-margin-top) var(--print-margin-right) var(--print-margin-bottom) var(--print-margin-left);
+}
+
+// If meta.colorPrimary is defined in the JSON, it will be injected here by the template engine
+// Example: :root { --color-primary: #2A3FFB; }
 
 .cv-container {
   font-size: 14px;
   font-family: system-ui, sans-serif;
-
-  li, p {
-    break-inside: auto;
-    page-break-inside: auto;
-  }
-
-  .section-title {
-    break-after: auto;
-    page-break-after: auto;
-  }
-
-  .page-unit,
-  .section-item {
-    break-inside: auto;
-    page-break-inside: auto;
+  max-width: 8.5in;  // Letter width
+  margin: 0 auto;    // Center on screen
+  
+  @media print {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    
+    // Only protect header and footer from breaking
+    .basics-section {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
   }
 
   footer {
-    margin-top: 1.5em;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-top: 3em;
     border-top: 1px solid $color-border-dimmer;
     padding: 4px 0 8px;
     display: flex;
@@ -68,7 +112,8 @@ a:hover {
 
 section {
   .section-title {
-    margin-top: 1.5em;
+    margin-top: var(--section-gap-large);
+    margin-bottom: var(--section-gap);
     display: flex;
 
     h2 {
@@ -79,26 +124,34 @@ section {
     }
     .line {
       flex-grow: 1;
-      margin: 10px 0 0 1em;
-      height: 2px;
+      margin: 12px 0 0 1em;
+      height: 1px;
       background-color: var(--color-primary);
     }
   }
 
   .section-item {
-    margin-top: 1em;
+    margin-top: var(--section-gap-small);
+    margin-left: var(--content-indent);
+    padding-right: var(--content-padding);
 
     h3 {
       font-size: $fz-3;
-      line-height: 1.3;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    h4 {
+      font-size: $fz-4;
+      line-height: 1.2;
       margin: 0;
     }
 
     ul {
-      margin: .5em 0;
-      padding-left: 16px;
+      margin: .3em 0;
+      padding-left: 1.5em;
       li {
-        margin-bottom: .3em;
+        margin-bottom: .15em;
       }
     }
   }
@@ -109,11 +162,11 @@ section {
     bottom: 1px;
   }
   .row {
-    margin: .3em 0;
+    margin: .15em 0;
   }
   .p, p {
     line-height: $lh-p;
-    margin: .5em 0;
+    margin: .3em 0;
   }
   .subtitle {
     font-size: $fz-4;
@@ -175,10 +228,13 @@ section {
 @media print {
   section {
     .section-title {
-      margin-top: 2.7em;
+      margin-top: var(--section-gap);
+      margin-bottom: var(--section-gap-small);
     }
     .section-item {
-      margin-top: 1.8em;
+      margin-top: var(--section-gap-small);
+      margin-left: var(--content-indent);
+      padding-right: var(--content-padding);
     }
   }
 }
@@ -188,6 +244,9 @@ section {
     font-size: $fz-1;
     font-weight: 600;
     margin: .1em 0;
+  }
+  .subtitle {
+    font-size: $fz-2;
   }
   .contact {
     color: $color-text-dim;
@@ -201,35 +260,101 @@ section {
 
     .item {
       a {
-        color: $color-text-dim;
+        color: var(--color-primary);
+        &.colored-link {
+          color: var(--color-primary);
+          text-decoration: none;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+  .colored-links {
+    color: var(--color-primary);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1em;
+    
+    .item {
+      white-space: nowrap;
+    }
+    
+    a {
+      color: inherit;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
       }
     }
   }
 }
 
+// Shared styles for sections with smaller text
+%academic-section {
+  font-size: $fz-5;
+  
+  .section-item {
+    line-height: 1.4;
+    
+    h3 {
+      font-size: $fz-4;
+    }
+    
+    h4 {
+      font-size: $fz-5;
+    }
+    
+    .subtitle {
+      font-size: $fz-5;
+    }
+  }
+}
+
+// Shared time display style and layout
+%time-display {
+  color: var(--time-color);
+  font-style: var(--time-font-style);
+  min-width: var(--time-min-width);
+  text-align: var(--time-text-align);
+}
+
+%time-container {
+  display: flex;
+  justify-content: space-between;
+  
+  // Content side
+  > *:first-child {
+    max-width: var(--time-content-ratio);
+  }
+  
+  // Time side
+  > .year,
+  > .date-range,
+  > .period {
+    @extend %time-display;
+  }
+}
+
 .education-section {
-  @media screen and (max-width: 700px) {
-    .space-between:nth-of-type(2) {
-      flex-wrap: wrap;
-      gap: 0.4em;
-    }
-    .study {
-      width: 100%;
-    }
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
   }
 }
 
 .work-section {
-  .section-item {
-    // Remove break properties to allow flow
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
   }
 }
 
 .projects-section {
+  @extend %academic-section;
   .space-between {
-    @media screen and (max-width: 500px) {
-      flex-wrap: wrap;
-    }
+    @extend %time-container;
   }
 }
 
@@ -239,43 +364,249 @@ section {
   }
 }
 
-.publications {
-  .item {
-    margin-bottom: 1em;
+.research-metrics-section {
+  .metrics {
+    display: flex;
+    gap: 2em;
+    font-size: $fz-4;
     
-    .title {
-      font-weight: bold;
-      margin-bottom: 0.2em;
+    .item {
+      color: $color-text-dim;
     }
-    
-    .authors {
-      color: var(--color-primary);
-      margin-bottom: 0.2em;
+  }
+}
+
+.academic-appointments-section {
+  .appointment {
+    .department {
+      color: $color-text-dim;
     }
-    
-    .publisher {
+    .institution {
       font-style: italic;
-      margin-bottom: 0.1em;
+    }
+  }
+}
+
+.teaching-section {
+  .course {
+    .row {
+      display: flex;
+      gap: 1em;
+    }
+    .course-info {
+      display: flex;
+      gap: 1em;
+    }
+    .code {
+      font-weight: 600;
+    }
+    .terms {
+      color: $color-text-dim;
+      font-style: italic;
+      min-width: 7em;
+      text-align: right;
+    }
+  }
+}
+
+.grants-section {
+  .grant {
+    .amount {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+    .agency {
+      font-style: italic;
+      color: $color-text-dim;
+    }
+  }
+}
+
+.mentoring-section {
+  @extend %academic-section;
+  
+  h3 {
+    margin-top: var(--section-gap-medium);
+    margin-bottom: var(--section-gap-small);
+    color: var(--color-primary);
+    font-size: $fz-4;
+  }
+
+  h4 {
+    margin-top: 0.3em;
+    margin-bottom: 0.2em;
+    color: $color-text-dim;
+    font-size: $fz-5;
+  }
+  
+  .student {
+    margin-top: 0.2em;
+    
+    .name {
+      font-weight: 600;
+    }
+    .details {
+      margin-top: 0.1em;
+    }
+    .program, .period {
+      color: $color-text-dim;
+    }
+    .dissertation, .thesis {
+      margin-top: 0.1em;
+    }
+  }
+}
+
+.editorial-positions-section {
+  .position {
+    .role {
+      font-weight: 600;
+    }
+    .journal {
+      font-style: italic;
+      color: $color-text-dim;
+    }
+  }
+}
+
+.professional-services-section {
+  @extend %academic-section;
+  
+  h3 {
+    margin-top: var(--section-gap-medium);
+    margin-bottom: var(--section-gap-small);
+    color: var(--color-primary);
+    font-size: $fz-4;
+  }
+
+  // Editorial Boards
+  .service {
+    margin-top: var(--section-gap-tiny);
+    
+    .space-between {
+      @extend %time-container;
     }
     
-    .date {
-      color: #666;
-      font-size: 0.9em;
-      margin-bottom: 0.1em;
+    .role {
+      font-weight: 600;
     }
     
-    .summary {
-      margin: 0.3em 0;
+    .journal, .organization, .committee {
+      font-style: italic;
+      color: $color-text-dim;
     }
     
-    .url {
-      font-size: 0.9em;
-      a {
-        color: var(--color-primary);
-        text-decoration: none;
-        &:hover {
-          text-decoration: underline;
-        }
+    .details {
+      margin: var(--section-gap-tiny) 0;
+      font-size: $fz-5;
+    }
+  }
+}
+
+.presentations-section {
+  @extend %academic-section;
+  
+  h3 {
+    margin-top: var(--section-gap-medium);
+    margin-bottom: var(--section-gap-small);
+    color: var(--color-primary);
+    font-size: $fz-4;
+  }
+
+  .talk, .presentation, .outreach {
+    margin-top: var(--section-gap-tiny);
+    
+    .space-between {
+      @extend %time-container;
+    }
+
+    .venue {
+      margin-top: var(--section-gap-tiny);
+      font-size: $fz-5;
+    }
+
+    .description {
+      margin: var(--section-gap-tiny) 0;
+      font-size: $fz-5;
+    }
+  }
+}
+
+.awards-section {
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
+  }
+}
+
+.certificates-section {
+  @extend %academic-section;
+  .space-between {
+    @extend %time-container;
+  }
+}
+
+.publications-section {
+  @extend %academic-section;
+  
+  // Force single column layout
+  .publications {
+    display: block !important;
+    column-count: 1 !important;
+    column-gap: 0 !important;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .publication {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 0.3rem;
+
+    .citation {
+      display: flex;
+      gap: 0.3rem;
+      text-align: justify;
+      line-height: 1.2;
+      
+      .number {
+        flex-shrink: 0;
+      }
+      
+      .text {
+        flex-grow: 1;
+      }
+    }
+  }
+
+  h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+    font-size: $fz-4;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+
+.research-areas-section {
+  @extend %academic-section;
+  
+  .section-item {
+    h3 {
+      font-size: $fz-4;
+      margin-bottom: 0.2em;
+    }
+    
+    .description {
+      font-size: $fz-5;
+      line-height: 1.3;
+    }
+    
+    .keywords {
+      margin-top: 0.4em;
+      .item {
+        font-size: $fz-6;
       }
     }
   }
