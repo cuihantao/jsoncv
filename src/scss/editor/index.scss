@@ -174,3 +174,41 @@ dialog {
     }
   }
 }
+
+.publications-box {
+  margin: 12px 0;
+  padding: 6px 8px;
+  border: 1px solid var(--grey-2);
+  border-radius: 4px;
+  
+  .box-title {
+    font-weight: 500;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--grey-2);
+  }
+  
+  button {
+    margin-bottom: 4px;
+  }
+  
+  .bibtex-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 2px;
+    font-size: 0.9em;
+    
+    label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      
+      input[type="radio"] {
+        margin: 0;
+        cursor: pointer;
+      }
+    }
+  }
+}
