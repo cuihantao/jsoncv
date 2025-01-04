@@ -6,7 +6,7 @@ import objectPath from 'object-path';
 
 import { JSONEditor } from '@json-editor/json-editor/dist/jsoneditor';
 
-import * as sampleModule from '../../cui.cv.json';
+import * as sampleModule from '../../sample.cv.prof.json';
 import * as jsoncvSchemaModule from '../../schema/jsoncv.schema.prof.json';
 import {
   getCVData,
