@@ -533,17 +533,27 @@
         },
         "version": {
           "type": "string",
-          "description": "A version field which follows semver - e.g. v1.0.0"
+          "description": "Version of the CV"
         },
         "lastModified": {
           "type": "string",
-          "description": "Using ISO 8601 with YYYY-MM-DDThh:mm:ss"
+          "description": "Last modified time of the CV"
+        },
+        "colorPrimary": {
+          "type": "string",
+          "description": "Primary color for the CV theme"
         },
         "pageSize": {
           "type": "string",
           "description": "Page size for the CV (A4 or letter)",
           "enum": ["A4", "letter"],
           "default": "A4"
+        },
+        "theme": {
+          "type": "string",
+          "description": "Theme for the CV",
+          "enum": ["reorx", "cuiv"],
+          "default": "reorx"
         }
       }
     }
