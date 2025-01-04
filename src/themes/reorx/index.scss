@@ -548,18 +548,19 @@ section {
     column-count: 1 !important;
     column-gap: 0 !important;
     width: 100%;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
 
   .publication {
     break-inside: avoid;
     page-break-inside: avoid;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.3rem;
 
     .citation {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.3rem;
       text-align: justify;
+      line-height: 1.2;
       
       .number {
         flex-shrink: 0;
@@ -572,8 +573,8 @@ section {
   }
 
   h3 {
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
     color: var(--color-primary);
     font-size: $fz-4;
     break-after: avoid;
