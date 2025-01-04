@@ -38,29 +38,36 @@ export function getPrimaryColor() {
 }
 
 export function saveBibTeX(content, filename) {
-  console.log('[Debug][Store] Saving BIB content to store, length:', content?.length || 0)
-  console.log('[Debug][Store] First 100 chars:', content?.substring(0, 100))
-  console.log('[Debug][Store] Saving BIB filename:', filename)
-  localStorage.setItem(storeKeys.bibTeX, content)
-  if (filename) {
-    localStorage.setItem(storeKeys.bibFileName, filename)
+  if (typeof window === 'undefined' || !window.localStorage) {
+    console.warn('[Debug][Store] Cannot save BibTeX: localStorage not available');
+    return;
   }
-  updateSavedTime()
+
+  console.log('[Debug][Store] Saving BibTeX to store, length:', content?.length || 0);
+  localStorage.setItem(storeKeys.bibTeX, content);
+  if (filename) {
+    localStorage.setItem(storeKeys.bibFileName, filename);
+  }
+  updateSavedTime();
 }
 
 export function getBibTeX() {
-  const content = localStorage.getItem(storeKeys.bibTeX)
-  console.log('[Debug][Store] Getting BIB content from store, length:', content?.length || 0)
-  if (!content && typeof window !== 'undefined' && window.__BIBTEX_CONTENT__) {
-    console.log('[Debug][Store] No content in localStorage, using injected content')
-    console.log('[Debug][Store] Injected content length:', window.__BIBTEX_CONTENT__.length)
-    console.log('[Debug][Store] First 100 chars:', window.__BIBTEX_CONTENT__.substring(0, 100))
-    return window.__BIBTEX_CONTENT__
+  // In preview mode, prefer the injected content
+  if (typeof window !== 'undefined' && window.__BIBTEX_CONTENT__) {
+    return window.__BIBTEX_CONTENT__;
   }
-  if (content) {
-    console.log('[Debug][Store] First 100 chars from store:', content.substring(0, 100))
+  
+  // In editor mode or as fallback, use localStorage
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const content = localStorage.getItem(storeKeys.bibTeX);
+    if (content) {
+      console.log('[Debug][Store] Retrieved BibTeX from localStorage, length:', content.length);
+      return content;
+    }
   }
-  return content
+  
+  console.warn('[Debug][Store] No BibTeX content available');
+  return null;
 }
 
 export function getBibFileName() {

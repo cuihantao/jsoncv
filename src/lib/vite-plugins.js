@@ -21,21 +21,3 @@ export function TransformEjs() {
     },
   }
 }
-
-/*
- * This plugin allows for importing bib files as strings.
- */
-export function TransformBib() {
-  return {
-    name: 'transform-bib',
-
-    transform(src, id) {
-      if (id.endsWith('.bib')) {
-        return {
-          code: `export default ${JSON.stringify(src)}`,
-          map: null,
-        }
-      }
-    },
-  }
-}

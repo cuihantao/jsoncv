@@ -31,9 +31,8 @@ let processedNameConfig = {
 
 // Publication state
 let currentPublications = []
-let currentBibTeX = getBibTeX() || ''
 
-// Register plugins
+// Register plugins and initialize
 console.log('[Debug][Citations] Registering plugins...')
 plugins.add('@citation-js/plugin-bibtex')
 plugins.add('@citation-js/plugin-doi')
@@ -68,20 +67,6 @@ async function initializeIEEETemplate() {
 
 // Debug: Log initial state
 console.log('[Debug][Citations] Initializing...')
-console.log('[Debug][Citations] Initial BIB content length:', currentBibTeX.length)
-if (currentBibTeX) {
-  console.log('[Debug][Citations] First 100 chars:', currentBibTeX.substring(0, 100))
-}
-
-// If we have content, process it immediately
-if (currentBibTeX) {
-  console.log('[Debug][Citations] Processing initial BIB content...')
-  processBibTeX(currentBibTeX).catch(error => {
-    console.error('[Debug][Citations] Failed to process initial BIB content:', error)
-  })
-} else {
-  console.warn('[Debug][Citations] No initial BibTeX content available')
-}
 
 /**
  * Get name configuration from CV data
@@ -379,7 +364,7 @@ export async function processBibTeX(bibtexContent) {
       return []
     }
 
-    currentBibTeX = bibtexContent
+    // Save to localStorage for persistence
     saveBibTeX(bibtexContent)
     
     // Get CV data for name highlighting
