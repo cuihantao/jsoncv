@@ -549,43 +549,70 @@ section {
 .publications-section {
   @extend %academic-section;
   
-  // Force single column layout
-  .publications {
-    display: block !important;
-    column-count: 1 !important;
-    column-gap: 0 !important;
-    width: 100%;
-    margin-bottom: 1rem;
-  }
-
   .publication {
+    margin-bottom: 1rem;
     break-inside: avoid;
     page-break-inside: avoid;
-    margin-bottom: 0.3rem;
-
+    
     .citation {
       display: flex;
-      gap: 0.3rem;
-      text-align: justify;
-      line-height: 1.2;
-      
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+
       .number {
-        flex-shrink: 0;
+        flex: 0 0 auto;
+        color: var(--color-primary);
       }
-      
+
       .text {
-        flex-grow: 1;
+        flex: 1;
+        line-height: 1.4;
+        
+        .title {
+          font-weight: bold;
+          margin-bottom: 0.3em;
+        }
+        
+        .authors {
+          color: var(--color-primary);
+          margin-bottom: 0.3em;
+        }
+        
+        .publisher {
+          font-style: italic;
+          margin-bottom: 0.2em;
+        }
+        
+        .date {
+          color: $color-text-dim;
+          font-size: 0.9em;
+          margin-bottom: 0.2em;
+        }
+        
+        .abstract {
+          margin: 0.5em 0;
+          color: $color-text-dim;
+        }
+
+        .doi {
+          color: var(--color-primary);
+          font-size: 0.9em;
+        }
       }
     }
-  }
 
-  h3 {
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
-    color: var(--color-primary);
-    font-size: $fz-4;
-    break-after: avoid;
-    page-break-after: avoid;
+    .url {
+      margin-top: 0.25rem;
+      font-size: 0.9em;
+      
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
   }
 }
 

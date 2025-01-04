@@ -1,45 +1,3 @@
-<script type="module">
-  import { initializeCitations } from '@/lib/init-citations.js';
-  
-  function tryInitialize() {
-    console.log('[Debug][Template] Trying to initialize...');
-    const section = document.querySelector('.publications-section');
-    if (!section) {
-      console.log('[Debug][Template] Publications section not ready, retrying...');
-      setTimeout(tryInitialize, 100);
-      return;
-    }
-    console.log('[Debug][Template] Found publications section:', {
-      id: section.id,
-      children: section.children.length,
-      html: section.innerHTML.substring(0, 100)
-    });
-    
-    initializeCitations().then(result => {
-      console.log('[Debug][Template] Initialization completed:', {
-        result,
-        sectionAfter: document.querySelector('.publications-section')?.children.length
-      });
-    }).catch(error => {
-      console.error('[Debug][Template] Initialization failed:', error);
-    });
-  }
-
-  // Try both DOMContentLoaded and load events
-  window.addEventListener('DOMContentLoaded', () => {
-    console.log('[Debug][Template] DOMContentLoaded fired');
-    tryInitialize();
-  });
-  
-  window.addEventListener('load', () => {
-    console.log('[Debug][Template] Load event fired');
-    tryInitialize();
-  });
-
-  // Start initial attempt
-  tryInitialize();
-</script>
-
 <%
 function linkInDiv(url) {
   if (!url) return ''
@@ -266,18 +224,42 @@ function date(item, level) {
 <% } %>
 
 <!-- Publications -->
-<% if (hasItems(cv.publications) && cv.publications.length > 0) { %>
+<% if (hasItems(cv.publications)) { %>
 <section class="publications-section">
   <div class="section-title">
     <h2>Publications</h2>
     <div class="line"></div>
   </div>
-
-  <div class="note" style="font-size: 0.9em; margin-bottom: 1em; font-style: italic;">
-    Names with <sup>+</sup> denote mentees of <%= cv.basics.name.split(' ').pop() %>.
-  </div>
-  
-  <!-- Publications will be dynamically inserted here by init-citations.js -->
+  <% for (const item of cv.publications) { %>
+    <div class="publication section-item">
+      <div class="citation">
+        <div class="number"><%= cv.publications.indexOf(item) + 1 %>.</div>
+        <div class="text">
+          <% if (item.name) { %>
+            <div class="title"><%= item.name %></div>
+          <% } %>
+          <% if (item.authors?.length) { %>
+            <div class="authors">
+              <%= item.authors.map(a => `${a.lastName}${a.firstName ? `, ${a.firstName}` : ''}`).join('; ') %>
+            </div>
+          <% } %>
+          <% if (item.publisher) { %>
+            <div class="publisher"><%= item.publisher %></div>
+          <% } %>
+          <% if (item.releaseDate) { %>
+            <div class="date"><%= fn.reformatDate(item.releaseDate) %></div>
+          <% } %>
+          <% if (item.abstract) { %>
+            <div class="abstract"><%- fn.renderMarkdown(item.abstract) %></div>
+          <% } %>
+          <% if (item.doi) { %>
+            <div class="doi">doi.org/<%= item.doi %></div>
+          <% } %>
+        </div>
+      </div>
+      <%- linkInDiv(item.url) %>
+    </div>
+  <% } %>
 </section>
 <% } %>
 
