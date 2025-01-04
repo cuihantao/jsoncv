@@ -116,10 +116,12 @@ button {
 
 .output-html {
   // set a fixed size so that responsive styles won't be applied in the iframe
-  width: 795px; // 210mm ≈ 793px
+  width: 875px; // 795px * 1.1 ≈ 875px
   height: 100%;
-  margin: 0; padding: 0; border: 0;
+  margin: 0; // remove auto margin since we're in a grid
+  padding: 0; border: 0;
   border-right: 1px solid var(--grey-2);
+  display: block;
 }
 
 .output-json {

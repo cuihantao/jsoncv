@@ -10,6 +10,7 @@
 .cv-container {
   width: calc(210mm - 20mm);
   padding: 10mm;
+  margin: 0 auto; /* center the container */
 }
 @media print {
   /* remove the printing simulations and common decorations , let @page decide the size and margin */
