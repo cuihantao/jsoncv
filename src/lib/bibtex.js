@@ -18,7 +18,10 @@ export async function processBibTeX(bibtexStr) {
     releaseDate: entry.issued?.['date-parts']?.[0]?.[0]?.toString() || '',
     url: entry.DOI ? `https://doi.org/${entry.DOI}` : entry.URL || '',
     summary: entry.abstract || '',
-    highlights: [entry.author?.map(a => `${a.family}, ${a.given}`).join('; ')].filter(Boolean)
+    authors: entry.author?.map(a => ({
+      firstName: a.given || '',
+      lastName: a.family || ''
+    })) || []
   }))
 }
 

@@ -297,6 +297,23 @@
             "type": "string",
             "description": "e.g. IEEE, Computer Magazine"
           },
+          "authors": {
+            "type": "array",
+            "description": "List of authors",
+            "items": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string",
+                  "description": "Author's first/given name"
+                },
+                "lastName": {
+                  "type": "string",
+                  "description": "Author's last/family name"
+                }
+              }
+            }
+          },
           "releaseDate": {
             "$ref": "#/definitions/iso8601"
           },
