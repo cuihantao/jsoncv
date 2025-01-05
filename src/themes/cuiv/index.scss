@@ -102,11 +102,7 @@ a {
   text-decoration: none;
 }
 
-a:visited, a:active {
-  color: var(--color-primary);
-}
 a:hover {
-  color: var(--color-primary);
   text-decoration: underline;
 }
 
@@ -606,6 +602,13 @@ section {
       margin-top: var(--section-gap-tiny);
       color: $color-text-dim;
       font-size: $fz-5;
+    }
+  }
+
+  .url a {
+    color: $color-text-dim;
+    &:hover {
+      color: $color-text-dim;
     }
   }
 }
