@@ -412,8 +412,8 @@ $inputUploadBibTeX.on('change', async () => {
       const publications = await processBibTeX(bibtexStr, currentData)
       
       // Get current mode from radio buttons
-      const shouldMerge = $('input[name="bibtex-mode"]:checked').val() === 'merge'
-      const newData = updatePublications(currentData, publications, shouldMerge)
+      const shouldReplace = $('input[name="bibtex-mode"]:checked').val() === 'replace'
+      const newData = updatePublications(currentData, publications, shouldReplace)
       editor.setValue(newData)
     } catch (e) {
       console.error('Error processing BibTeX:', e)
