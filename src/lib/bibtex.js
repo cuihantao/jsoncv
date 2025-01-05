@@ -90,7 +90,7 @@ export function processBibTeX(bibtexStr, cvData, shouldReplace = false) {
       const pub = {
         name: entry.title,
         publisher: entry['container-title'] || entry.journal || '',
-        releaseDate: entry.issued?.['date-parts']?.[0]?.[0]?.toString() || '',
+        releaseDate: entry.issued?.['date-parts']?.[0]?.[0]?.toString() || entry.year?.toString() || '',
         url: entry.DOI ? `https://doi.org/${entry.DOI}` : entry.URL || '',
         type: pubType,
         formattedHTML: `<div class="citation">${processedHTML}</div>`,
@@ -112,12 +112,20 @@ export function processBibTeX(bibtexStr, cvData, shouldReplace = false) {
       newCvData.publications = [...(cvData.publications || []), ...publications]
     }
 
+    // Sort all publications by release date (newest first)
+    newCvData.publications.sort((a, b) => {
+      const dateA = a.releaseDate ? new Date(a.releaseDate) : new Date(0);
+      const dateB = b.releaseDate ? new Date(b.releaseDate) : new Date(0);
+      return dateB - dateA;
+    });
+
     console.log('[Debug] CV publications after update:', {
       mode: shouldReplace ? 'replace' : 'merge',
       total: newCvData.publications.length,
       fromBibtex: publications.length,
     })
     console.log(newCvData)
+
     return newCvData
   } catch (error) {
     console.error('[Error] Failed to process BibTeX:', error)
