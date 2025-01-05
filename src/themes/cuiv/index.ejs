@@ -4,6 +4,22 @@ function linkInDiv(url) {
   return `<div class="url row"><a href="${url}" target="_blank">${fn.noSchemaURL(url)}</a></div>`
 }
 
+// Format citation from structured data
+function formatCitation(pub) {
+  if (pub.formattedHTML) return pub.formattedHTML;
+  if (pub.citation) return pub.citation;
+  
+  const parts = [];
+  if (pub.authors && pub.authors.length > 0) {
+    parts.push(pub.authors.join(', '));
+  }
+  if (pub.name) parts.push(`"${pub.name}"`);
+  if (pub.publisher) parts.push(pub.publisher);
+  if (pub.releaseDate) parts.push(pub.releaseDate);
+  
+  return parts.join(', ');
+}
+
 function formatLocation(loc) {
   const cityToCountry = ['city', 'region', 'postalCode', 'countryCode'].map(key => loc[key]).filter(v => v).join(', ')
   if (!loc.address) return cityToCountry
@@ -11,8 +27,7 @@ function formatLocation(loc) {
 }
 
 function hasItems(arr) {
-  if (arr && arr.length) return true
-  return false
+  return Array.isArray(arr) && arr.length > 0
 }
 
 function dateRange(item, level) {
@@ -224,30 +239,62 @@ function date(item, level) {
 <% } %>
 
 <!-- Publications -->
-<% if (hasItems(cv.publications)) { %>
+<% 
+// Group publications by type, defaulting to 'other' if type not specified
+const journalPubs = cv.publications?.filter(p => p.type === 'journal') || []
+const conferencePubs = cv.publications?.filter(p => p.type === 'conference') || []
+const otherPubs = cv.publications?.filter(p => !p.type || p.type === 'other') || []
+
+// Only show section if there are publications
+if (hasItems(journalPubs) || hasItems(conferencePubs) || hasItems(otherPubs)) { 
+%>
 <section class="publications-section">
   <div class="section-title">
     <h2>Publications</h2>
     <div class="line"></div>
   </div>
-  <% for (const item of cv.publications) { %>
-    <div class="publication section-item">
-      <div class="row">
-        <h3><%= item.name %></h3>
-      </div>
-      <% if (item.authors?.length) { %>
-        <div class="authors row">
-          <%= item.authors.join('; ') %>
+
+  <% if (hasItems(journalPubs)) { %>
+    <div class="subsection">
+      <h3>Journal Papers</h3>
+      <% for (const item of journalPubs) { %>
+        <div class="publication section-item">
+          <div class="citation"><%- formatCitation(item) %></div>
+          <%- linkInDiv(item.url) %>
+          <% if (item.summary) { %>
+            <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
+          <% } %>
         </div>
       <% } %>
-      <div class="publisher row subtitle">
-        <% if (item.venue || item.releaseDate) { %>
-          <%= item.venue %><%= item.releaseDate ? (item.venue ? ', ' : '') + fn.reformatDate(item.releaseDate, 'YYYY') : '' %>
-        <% } %>
-      </div>
-      <%- linkInDiv(item.url) %>
-      <% if (item.summary) { %>
-        <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
+    </div>
+  <% } %>
+
+  <% if (hasItems(conferencePubs)) { %>
+    <div class="subsection">
+      <h3>Conference Papers</h3>
+      <% for (const item of conferencePubs) { %>
+        <div class="publication section-item">
+          <div class="citation"><%- formatCitation(item) %></div>
+          <%- linkInDiv(item.url) %>
+          <% if (item.summary) { %>
+            <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  <% } %>
+
+  <% if (hasItems(otherPubs)) { %>
+    <div class="subsection">
+      <h3>Other Publications</h3>
+      <% for (const item of otherPubs) { %>
+        <div class="publication section-item">
+          <div class="citation"><%- formatCitation(item) %></div>
+          <%- linkInDiv(item.url) %>
+          <% if (item.summary) { %>
+            <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
+          <% } %>
+        </div>
       <% } %>
     </div>
   <% } %>

@@ -125,7 +125,7 @@ section {
     .line {
       flex-grow: 1;
       margin: 12px 0 0 1em;
-      height: 1px;
+      height: 2px;
       background-color: var(--color-primary);
     }
   }
@@ -549,69 +549,41 @@ section {
 .publications-section {
   @extend %academic-section;
   
-  .publication {
-    margin-bottom: 1rem;
-    break-inside: avoid;
-    page-break-inside: avoid;
+  .subsection {
+    margin-bottom: var(--section-gap-medium);
     
-    .citation {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
+    h3 {
+      color: var(--color-primary);
+      margin-bottom: var(--section-gap-small);
+      font-size: $fz-3;
+    }
+  }
 
-      .number {
-        flex: 0 0 auto;
+  .publication {
+    margin-bottom: var(--section-gap-small);
+
+    .citation {
+      line-height: $lh-p;
+      
+      strong {  // For CV owner highlighting
         color: var(--color-primary);
       }
-
-      .text {
-        flex: 1;
-        line-height: 1.4;
-        
-        .title {
-          font-weight: bold;
-          margin-bottom: 0.3em;
-        }
-        
-        .authors {
-          color: var(--color-primary);
-          margin-bottom: 0.3em;
-        }
-        
-        .publisher {
-          font-style: italic;
-          margin-bottom: 0.2em;
-        }
-        
-        .date {
-          color: $color-text-dim;
-          font-size: 0.9em;
-          margin-bottom: 0.2em;
-        }
-        
-        .abstract {
-          margin: 0.5em 0;
-          color: $color-text-dim;
-        }
-
-        .doi {
-          color: var(--color-primary);
-          font-size: 0.9em;
-        }
+      
+      em {  // For mentee highlighting
+        font-style: italic;
+        color: $color-text-dim;
       }
     }
 
     .url {
-      margin-top: 0.25rem;
-      font-size: 0.9em;
-      
-      a {
-        color: var(--color-primary);
-        text-decoration: none;
-        &:hover {
-          text-decoration: underline;
-        }
-      }
+      margin-top: var(--section-gap-tiny);
+      font-size: $fz-5;
+    }
+
+    .summary {
+      margin-top: var(--section-gap-tiny);
+      color: $color-text-dim;
+      font-size: $fz-5;
     }
   }
 }
