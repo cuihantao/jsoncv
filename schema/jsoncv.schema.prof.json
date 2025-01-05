@@ -293,47 +293,57 @@
     },
     "publications": {
       "type": "array",
-      "description": "Specify your publications through your career",
+      "description": "Publications from both BibTeX and manual entry",
       "items": {
         "type": "object",
         "additionalProperties": true,
         "properties": {
           "name": {
             "type": "string",
-            "description": "e.g. The World Wide Web"
-          },
-          "publisher": {
-            "type": "string",
-            "description": "e.g. IEEE, Computer Magazine"
-          },
-          "releaseDate": {
-            "type": "string",
-            "description": "e.g. 2024-02-01"
-          },
-          "url": {
-            "type": "string",
-            "description": "e.g. http://www.computer.org.example.com/csdl/mags/co/1996/10/rx069-abs.html",
-            "format": "uri"
-          },
-          "summary": {
-            "type": "string",
-            "description": "Short summary of publication. e.g. Discussion of the World Wide Web, HTTP, HTML."
+            "description": "Title of the publication"
           },
           "type": {
             "type": "string",
-            "description": "Publication type",
-            "enum": ["article", "conference", "other"]
+            "enum": ["journal", "conference", "other"],
+            "description": "Type of publication"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "DOI or URL to the publication"
           },
           "formattedHTML": {
             "type": "string",
-            "description": "Pre-formatted citation HTML from citation.js"
+            "description": "Pre-formatted citation HTML (from BibTeX or manual)"
           },
           "source": {
             "type": "string",
-            "description": "Where this publication came from",
-            "enum": ["bibtex", "manual"]
+            "enum": ["bibtex", "manual"],
+            "description": "Source of this publication entry"
+          },
+          "authors": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of authors"
+          },
+          "publisher": {
+            "type": "string",
+            "description": "Journal/conference name or publisher"
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "Publication date"
+          },
+          "citationKey": {
+            "type": "string",
+            "description": "BibTeX citation key (for BibTeX entries)"
+          },
+          "bibtexEntry": {
+            "type": "object",
+            "description": "Full BibTeX entry data (for BibTeX entries)"
           }
-        }
+        },
+        "required": ["name", "type", "formattedHTML", "source"]
       }
     },
     "skills": {
