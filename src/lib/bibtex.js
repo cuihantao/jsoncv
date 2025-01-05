@@ -1,6 +1,18 @@
 import { Cite } from '@citation-js/core'
 import '@citation-js/plugin-bibtex'
 import '@citation-js/plugin-csl'
+import { plugins } from '@citation-js/core'
+
+// Fetch and register IEEE CSL template
+fetch('https://raw.githubusercontent.com/citation-style-language/styles/master/ieee.csl')
+  .then(response => response.text())
+  .then(template => {
+    plugins.config.get('@csl').templates.add('ieee', template)
+    console.log('[Debug] Successfully registered IEEE CSL template')
+  })
+  .catch(error => {
+    console.error('[Error] Failed to fetch IEEE CSL template:', error)
+  })
 
 /**
  * Map BibTeX entry types to CV publication types
