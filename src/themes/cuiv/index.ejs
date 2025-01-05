@@ -5,10 +5,14 @@ function linkInDiv(url) {
 }
 
 // Format citation from structured data
-function formatCitation(pub) {
-  if (pub.formattedHTML) return pub.formattedHTML;
-  if (pub.citation) return pub.citation;
+function formatCitation(pub, index) {
+  // If we have pre-formatted HTML (from BibTeX), use it but replace the number
+  if (pub.formattedHTML) {
+    // Replace any number in [x] with current index + 1
+    return pub.formattedHTML.replace(/\[\d+\]/, `[${index + 1}]`);
+  }
   
+  // Otherwise format from structured data
   const parts = [];
   if (pub.authors && pub.authors.length > 0) {
     parts.push(pub.authors.join(', '));
@@ -17,7 +21,8 @@ function formatCitation(pub) {
   if (pub.publisher) parts.push(pub.publisher);
   if (pub.releaseDate) parts.push(pub.releaseDate);
   
-  return parts.join(', ');
+  // Return formatted HTML with the same structure as Citation.js output
+  return `<div class="citation"><div class="csl-bib-body"><div class="csl-entry"><div class="csl-left-margin">[${index + 1}]</div><div class="csl-right-inline">${parts.join(', ')}</div></div></div></div>`;
 }
 
 function formatLocation(loc) {
@@ -257,13 +262,10 @@ if (hasItems(journalPubs) || hasItems(conferencePubs) || hasItems(otherPubs)) {
   <% if (hasItems(journalPubs)) { %>
     <div class="subsection">
       <h3>Journal Papers</h3>
-      <% for (const item of journalPubs) { %>
+      <% for (let i = 0; i < journalPubs.length; i++) { %>
         <div class="publication section-item">
-          <div class="citation"><%- formatCitation(item) %></div>
-          <%- linkInDiv(item.url) %>
-          <% if (item.summary) { %>
-            <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
-          <% } %>
+          <div class="citation"><%- formatCitation(journalPubs[i], i) %></div>
+          <%- linkInDiv(journalPubs[i].url) %>
         </div>
       <% } %>
     </div>
@@ -272,13 +274,10 @@ if (hasItems(journalPubs) || hasItems(conferencePubs) || hasItems(otherPubs)) {
   <% if (hasItems(conferencePubs)) { %>
     <div class="subsection">
       <h3>Conference Papers</h3>
-      <% for (const item of conferencePubs) { %>
+      <% for (let i = 0; i < conferencePubs.length; i++) { %>
         <div class="publication section-item">
-          <div class="citation"><%- formatCitation(item) %></div>
-          <%- linkInDiv(item.url) %>
-          <% if (item.summary) { %>
-            <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
-          <% } %>
+          <div class="citation"><%- formatCitation(conferencePubs[i], i) %></div>
+          <%- linkInDiv(conferencePubs[i].url) %>
         </div>
       <% } %>
     </div>
@@ -287,13 +286,10 @@ if (hasItems(journalPubs) || hasItems(conferencePubs) || hasItems(otherPubs)) {
   <% if (hasItems(otherPubs)) { %>
     <div class="subsection">
       <h3>Other Publications</h3>
-      <% for (const item of otherPubs) { %>
+      <% for (let i = 0; i < otherPubs.length; i++) { %>
         <div class="publication section-item">
-          <div class="citation"><%- formatCitation(item) %></div>
-          <%- linkInDiv(item.url) %>
-          <% if (item.summary) { %>
-            <div class="summary p"><%- fn.renderMarkdown(item.summary) %></div>
-          <% } %>
+          <div class="citation"><%- formatCitation(otherPubs[i], i) %></div>
+          <%- linkInDiv(otherPubs[i].url) %>
         </div>
       <% } %>
     </div>

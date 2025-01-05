@@ -39,7 +39,7 @@ let lastBibTeX = null
 /**
  * Process BibTeX string and return publications in JSONCV format
  */
-export function processBibTeX(bibtexStr, cvData) {
+export function processBibTeX(bibtexStr, cvData, shouldReplace = false) {
   // Store raw BibTeX
   lastBibTeX = bibtexStr
   
@@ -48,50 +48,76 @@ export function processBibTeX(bibtexStr, cvData) {
     const cite = new Cite(bibtexStr)
     console.log('[Debug] Total entries in BibTeX:', cite.data.length)
     
-    // Process each entry
+    // Format all entries together to get correct numbering
+    const formattedHTML = cite.format('bibliography', {
+      format: 'html',
+      template: 'ieee',
+      lang: 'en-US'
+    })
+    
+    // Clean up the HTML structure while preserving content
+    const processedHTML = formattedHTML
+      .replace(/\r?\n|\r/g, '') // Remove all newlines
+      .replace(/>\s+</g, '><')  // Remove whitespace between tags
+      .replace(/\s+/g, ' ')     // Replace multiple spaces with single space
+      .replace(/, doi: .*?(?=<\/div>)/g, '')  // Remove DOI from citation text
+      .trim()                   // Remove leading/trailing whitespace
+
+    // Extract individual citations from the processed HTML
+    const citationDivs = processedHTML.match(/<div class="csl-entry">.*?<\/div>/g) || []
+    
+    // Process each entry with its formatted citation
     const publications = cite.data.map((entry, index) => {
-      // Create a single-entry citation for formatting
-      const singleCite = new Cite(entry)
-      console.log(`[Debug] Entry ${index}:`, entry)
+      console.log(`[Debug] Entry ${index} type:`, entry.type)
       
-      // Format this entry using IEEE style
+      // Format individual citation
+      const singleCite = new Cite(entry)
       const formattedHTML = singleCite.format('bibliography', {
         format: 'html',
         template: 'ieee',
         lang: 'en-US'
       })
-      console.log(`[Debug] Formatted citation ${index}:`, formattedHTML)
-
+      
+      // Clean up the HTML structure
+      const processedHTML = formattedHTML
+        .replace(/\r?\n|\r/g, '') // Remove all newlines
+        .replace(/>\s+</g, '><')  // Remove whitespace between tags
+        .replace(/\s+/g, ' ')     // Replace multiple spaces with single space
+        .replace(/, doi: .*?(?=<\/div>)/g, '')  // Remove DOI from citation text
+        .trim()                   // Remove leading/trailing whitespace
+      
       const pubType = PUBLICATION_TYPE_MAP[entry.type] || 'other'
       const pub = {
         name: entry.title,
         publisher: entry['container-title'] || entry.journal || '',
         releaseDate: entry.issued?.['date-parts']?.[0]?.[0]?.toString() || '',
         url: entry.DOI ? `https://doi.org/${entry.DOI}` : entry.URL || '',
-        summary: entry.abstract || '',
         type: pubType,
-        formattedHTML: formattedHTML,  // Store the complete formatted HTML
+        formattedHTML: `<div class="citation">${processedHTML}</div>`,
+        citationKey: entry.id,
+        bibtexEntry: entry,
         source: 'bibtex'
       }
-      console.log(`[Debug] Created publication ${index}:`, pub)
       return pub
     })
     
     // Create a new CV data object with updated publications
     const newCvData = { ...cvData }
     
-    // Get existing publications that aren't from BibTeX
-    const existingPubs = (cvData.publications || []).filter(p => p.source !== 'bibtex')
-    
-    // Combine existing non-BibTeX publications with new ones
-    newCvData.publications = [...existingPubs, ...publications]
+    if (shouldReplace) {
+      // In replace mode, use only BibTeX publications
+      newCvData.publications = publications
+    } else {
+      // In merge mode, combine with existing publications
+      newCvData.publications = [...(cvData.publications || []), ...publications]
+    }
 
     console.log('[Debug] CV publications after update:', {
+      mode: shouldReplace ? 'replace' : 'merge',
       total: newCvData.publications.length,
       fromBibtex: publications.length,
-      existing: existingPubs.length,
-      sample: newCvData.publications[0]
     })
+    console.log(newCvData)
     return newCvData
   } catch (error) {
     console.error('[Error] Failed to process BibTeX:', error)
@@ -124,10 +150,10 @@ function _parsePublication(pub) {
 /**
  * Update publications in CV data (for backward compatibility)
  */
-export function updatePublications(cvData, publications) {
+export function updatePublications(cvData, publications, shouldReplace = false) {
   // Just pass through to processBibTeX if we have BibTeX data
   if (lastBibTeX) {
-    return processBibTeX(lastBibTeX, cvData)
+    return processBibTeX(lastBibTeX, cvData, shouldReplace)
   }
   return cvData
 } 

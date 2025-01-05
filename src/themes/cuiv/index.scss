@@ -102,11 +102,7 @@ a {
   text-decoration: none;
 }
 
-a:visited, a:active {
-  color: var(--color-primary);
-}
 a:hover {
-  color: var(--color-primary);
   text-decoration: underline;
 }
 
@@ -573,17 +569,46 @@ section {
         font-style: italic;
         color: $color-text-dim;
       }
+
+      // Make citation number and content appear inline
+      .csl-bib-body {
+        display: flex;
+        align-items: flex-start;
+      }
+      
+      .csl-entry {
+        display: flex;
+        align-items: flex-start;
+        flex: 1;
+        
+        .csl-left-margin {
+          min-width: 2.5em;
+          padding-right: 0.5em;
+        }
+        
+        .csl-right-inline {
+          flex: 1;
+        }
+      }
     }
 
     .url {
       margin-top: var(--section-gap-tiny);
       font-size: $fz-5;
+      margin-left: 3em;  // Match citation content alignment (2.5em + 0.5em padding)
     }
 
     .summary {
       margin-top: var(--section-gap-tiny);
       color: $color-text-dim;
       font-size: $fz-5;
+    }
+  }
+
+  .url a {
+    color: $color-text-dim;
+    &:hover {
+      color: $color-text-dim;
     }
   }
 }
