@@ -1,5 +1,6 @@
 import { Cite } from '@citation-js/core'
 import '@citation-js/plugin-bibtex'
+import '@citation-js/plugin-csl'
 
 /**
  * Map BibTeX entry types to CV publication types
@@ -24,139 +25,32 @@ const PUBLICATION_TYPE_MAP = {
 let lastBibTeX = null
 
 /**
- * Simple name matching considering common variations
- */
-function _matchName(authorName, targetName) {
-  // Convert both to lowercase for comparison
-  authorName = authorName.toLowerCase()
-  targetName = targetName.toLowerCase()
-  
-  // Direct match
-  if (authorName === targetName) return true
-  
-  // Split names into parts
-  const authorParts = authorName.split(' ')
-  const targetParts = targetName.split(' ')
-  
-  // Match last name and first initial
-  if (authorParts.length > 0 && targetParts.length > 0) {
-    const authorLast = authorParts[authorParts.length - 1]
-    const targetLast = targetParts[targetParts.length - 1]
-    
-    if (authorLast === targetLast) {
-      // If last names match, check first initial
-      const authorFirst = authorParts[0][0]
-      const targetFirst = targetParts[0][0]
-      if (authorFirst === targetFirst) return true
-    }
-  }
-  
-  return false
-}
-
-/**
- * Extract names to highlight from CV data
- */
-function _getHighlightNames(cvData) {
-  return {
-    owner: [cvData.basics?.name || ''],  // Owner's name from CV basics
-    mentees: cvData.mentees?.map(m => m.name) || []  // Mentee names if available
-  }
-}
-
-/**
- * Format citation in IEEE style without relying on CSL template
- */
-function _formatIEEECitation(entry) {
-  const authors = entry.author?.map(a => {
-    const given = (a.given || '').split(' ').map(n => n[0]).join('. ')
-    const family = a.family || ''
-    return `${given}. ${family}`
-  }) || []
-
-  // IEEE style: up to 6 authors, then et al.
-  let authorText = ''
-  if (authors.length > 6) {
-    authorText = authors.slice(0, 6).join(', ') + ' et al.'
-  } else {
-    authorText = authors.join(', ')
-  }
-
-  // Build citation parts
-  const parts = [
-    authorText,
-    `"${entry.title}"`,
-    entry['container-title'] || entry.journal || '',
-    entry.volume ? `vol. ${entry.volume}` : '',
-    entry.issue ? `no. ${entry.issue}` : '',
-    entry.page ? `pp. ${entry.page}` : '',
-    entry.issued?.['date-parts']?.[0]?.[0] || ''
-  ].filter(Boolean)  // Remove empty parts
-
-  return parts.join(', ') + '.'
-}
-
-/**
  * Process BibTeX string and return publications in JSONCV format
  */
-export async function processBibTeX(bibtexStr, cvData) {
+export function processBibTeX(bibtexStr, cvData) {
   // Store raw BibTeX
   lastBibTeX = bibtexStr
   
-  const cite = await Cite.async(bibtexStr)
-  console.log('[Debug] Total entries in BibTeX:', cite.data.length)
-  console.log('[Debug] Raw BibTeX data:', cite.data)
-  
-  const highlightNames = _getHighlightNames(cvData)
-  const publications = []  // Start with a flat array
-  
-  cite.data.forEach((entry, index) => {
-    console.log(`\n[Debug] Processing entry ${index + 1}/${cite.data.length}:`, {
-      title: entry.title,
-      type: entry.type,
-      rawEntry: entry
-    })
+  try {
+    // Parse BibTeX
+    const cite = new Cite(bibtexStr)
+    console.log('[Debug] Total entries in BibTeX:', cite.data.length)
     
-    try {
-      // Process authors with highlighting
-      const processedAuthors = entry.author?.map(a => {
-        try {
-          // Handle both object and string formats
-          const author = typeof a === 'string' ? JSON.parse(a) : a
-          // Extract firstName and lastName from either format
-          const firstName = author.given || author.firstName || ''
-          const lastName = author.family || author.lastName || ''
-          const fullName = `${firstName}${lastName ? ` ${lastName}` : ''}`.trim()
-          
-          // Determine highlight status
-          const isOwner = highlightNames.owner.some(name => _matchName(fullName, name))
-          const isMentee = highlightNames.mentees.some(name => _matchName(fullName, name))
-          
-          // Apply highlighting markers
-          if (isOwner) {
-            return `<strong>${fullName}</strong>`
-          } else if (isMentee) {
-            return `<em>${fullName}</em>`
-          }
-          return fullName
-        } catch (e) {
-          console.error('[Error] Failed to process author:', a, e)
-          return ''
-        }
-      }) || []
-
-      // Format citation in IEEE style with HTML
-      const formattedHTML = _formatIEEECitationHTML(entry, processedAuthors)
-
-      // Determine publication type with debug info
-      const pubType = PUBLICATION_TYPE_MAP[entry.type] || 'other'
-      console.log('[Debug] Type determination:', {
-        entryTitle: entry.title,
-        entryType: entry.type,
-        mappedType: pubType,
-        hasType: entry.type in PUBLICATION_TYPE_MAP
+    // Process each entry
+    const publications = cite.data.map((entry, index) => {
+      // Create a single-entry citation for formatting
+      const singleCite = new Cite(entry)
+      console.log(`[Debug] Entry ${index}:`, entry)
+      
+      // Format this entry using IEEE style
+      const formattedHTML = singleCite.format('bibliography', {
+        format: 'html',
+        template: 'ieee',
+        lang: 'en-US'
       })
+      console.log(`[Debug] Formatted citation ${index}:`, formattedHTML)
 
+      const pubType = PUBLICATION_TYPE_MAP[entry.type] || 'other'
       const pub = {
         name: entry.title,
         publisher: entry['container-title'] || entry.journal || '',
@@ -164,50 +58,33 @@ export async function processBibTeX(bibtexStr, cvData) {
         url: entry.DOI ? `https://doi.org/${entry.DOI}` : entry.URL || '',
         summary: entry.abstract || '',
         type: pubType,
-        formattedHTML,
+        formattedHTML: formattedHTML,  // Store the complete formatted HTML
         source: 'bibtex'
       }
+      console.log(`[Debug] Created publication ${index}:`, pub)
+      return pub
+    })
+    
+    // Create a new CV data object with updated publications
+    const newCvData = { ...cvData }
+    
+    // Get existing publications that aren't from BibTeX
+    const existingPubs = (cvData.publications || []).filter(p => p.source !== 'bibtex')
+    
+    // Combine existing non-BibTeX publications with new ones
+    newCvData.publications = [...existingPubs, ...publications]
 
-      publications.push(pub)
-      console.log('[Debug] Successfully processed publication:', pub)
-    } catch (e) {
-      console.error('[Error] Failed to process entry:', entry, e)
-    }
-  })
-  
-  console.log(`\n[Debug] Final processing summary:`, {
-    totalBibTeXEntries: cite.data.length,
-    processedPublications: publications.length,
-    byType: publications.reduce((acc, pub) => {
-      acc[pub.type] = (acc[pub.type] || 0) + 1
-      return acc
-    }, {})
-  })
-  
-  return publications
-}
-
-/**
- * Format citation in IEEE style with HTML
- */
-function _formatIEEECitationHTML(entry, processedAuthors) {
-  // Use processed authors that already have HTML tags
-  const authorText = processedAuthors.length > 6 
-    ? processedAuthors.slice(0, 6).join(', ') + ' et al.'
-    : processedAuthors.join(', ')
-
-  // Build citation parts
-  const parts = [
-    authorText,
-    `"${entry.title}"`,
-    entry['container-title'] || entry.journal || '',
-    entry.volume ? `vol. ${entry.volume}` : '',
-    entry.issue ? `no. ${entry.issue}` : '',
-    entry.page ? `pp. ${entry.page}` : '',
-    entry.issued?.['date-parts']?.[0]?.[0] || ''
-  ].filter(Boolean)  // Remove empty parts
-
-  return parts.join(', ') + '.'
+    console.log('[Debug] CV publications after update:', {
+      total: newCvData.publications.length,
+      fromBibtex: publications.length,
+      existing: existingPubs.length,
+      sample: newCvData.publications[0]
+    })
+    return newCvData
+  } catch (error) {
+    console.error('[Error] Failed to process BibTeX:', error)
+    return cvData
+  }
 }
 
 /**
@@ -223,39 +100,22 @@ export function getLastBibTeX() {
 function _parsePublication(pub) {
   if (typeof pub === 'string') {
     try {
-      return JSON.parse(pub);
+      return JSON.parse(pub)
     } catch (e) {
-      console.error('Failed to parse publication:', e);
-      return pub;
+      console.error('Failed to parse publication:', e)
+      return pub
     }
   }
-  return pub;
+  return pub
 }
 
 /**
- * Update publications in CV data (replace or merge)
+ * Update publications in CV data (for backward compatibility)
  */
-export function updatePublications(cvData, publications, shouldMerge = false) {
-  // Ensure cvData has a valid publications array
-  if (!Array.isArray(cvData.publications)) {
-    cvData.publications = []
+export function updatePublications(cvData, publications) {
+  // Just pass through to processBibTeX if we have BibTeX data
+  if (lastBibTeX) {
+    return processBibTeX(lastBibTeX, cvData)
   }
-
-  // For merging, we want to:
-  // 1. Keep existing manual entries
-  // 2. Replace or add BibTeX entries
-  if (shouldMerge) {
-    // Keep manual entries
-    const manualPubs = cvData.publications.filter(p => p.source === 'manual')
-    // Add new BibTeX entries
-    return {
-      ...cvData,
-      publications: [...manualPubs, ...publications]
-    }
-  }
-
-  return {
-    ...cvData,
-    publications
-  }
+  return cvData
 } 
