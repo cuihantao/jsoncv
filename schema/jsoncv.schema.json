@@ -283,48 +283,69 @@
       }
     },
     "publications": {
-      "type": "array",
-      "description": "Specify your publications through your career",
-      "items": {
-        "type": "object",
-        "additionalProperties": true,
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "e.g. The World Wide Web"
-          },
-          "publisher": {
-            "type": "string",
-            "description": "e.g. IEEE, Computer Magazine"
-          },
-          "authors": {
-            "type": "array",
-            "description": "List of authors",
-            "items": {
-              "type": "object",
-              "properties": {
-                "firstName": {
-                  "type": "string",
-                  "description": "Author's first/given name"
+      "type": "object",
+      "properties": {
+        "journal": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Title of the publication"
+              },
+              "authors": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 },
-                "lastName": {
-                  "type": "string",
-                  "description": "Author's last/family name"
+                "description": "List of authors with highlighting markers"
+              },
+              "venue": {
+                "type": "string",
+                "description": "Journal or conference name"
+              },
+              "releaseDate": {
+                "type": "string",
+                "description": "Publication year"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "description": "DOI or URL to the publication"
+              },
+              "summary": {
+                "type": "string",
+                "description": "Abstract or summary"
+              },
+              "formattedCitation": {
+                "type": "string",
+                "description": "IEEE formatted citation"
+              },
+              "highlightInfo": {
+                "type": "object",
+                "properties": {
+                  "hasOwner": {
+                    "type": "boolean"
+                  },
+                  "hasMentee": {
+                    "type": "boolean"
+                  }
                 }
               }
             }
-          },
-          "releaseDate": {
-            "$ref": "#/definitions/iso8601"
-          },
-          "url": {
-            "type": "string",
-            "description": "e.g. http://www.computer.org.example.com/csdl/mags/co/1996/10/rx069-abs.html",
-            "format": "uri"
-          },
-          "summary": {
-            "type": "string",
-            "description": "Short summary of publication. e.g. Discussion of the World Wide Web, HTTP, HTML."
+          }
+        },
+        "conference": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/publications/properties/journal/items"
+          }
+        },
+        "other": {
+          "type": "array",
+          "items": {
+            "$ref": "#/properties/publications/properties/journal/items"
           }
         }
       }

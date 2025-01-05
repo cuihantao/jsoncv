@@ -408,8 +408,8 @@ $inputUploadBibTeX.on('change', async () => {
   reader.onload = async (e) => {
     try {
       const bibtexStr = e.target.result
-      const publications = await processBibTeX(bibtexStr)
       const currentData = editor.getValue()
+      const publications = await processBibTeX(bibtexStr, currentData)
       
       // Get current mode from radio buttons
       const shouldMerge = $('input[name="bibtex-mode"]:checked').val() === 'merge'

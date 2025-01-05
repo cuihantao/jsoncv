@@ -24,6 +24,7 @@
   "dependencies": {
     "@citation-js/core": "^0.7.1",
     "@citation-js/plugin-bibtex": "^0.7.1",
+    "@citation-js/plugin-csl": "^0.7.14",
     "@iconify/json": "^2.2.15",
     "@json-editor/json-editor": "^2.9.0-beta.1",
     "ajv": "^8.12.0",
