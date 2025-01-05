@@ -6,9 +6,13 @@ function linkInDiv(url) {
 
 // Format citation from structured data
 function formatCitation(pub, index) {
-  if (pub.formattedHTML) return pub.formattedHTML;
-  if (pub.citation) return pub.citation;
+  // If we have pre-formatted HTML (from BibTeX), use it but replace the number
+  if (pub.formattedHTML) {
+    // Replace any number in [x] with current index + 1
+    return pub.formattedHTML.replace(/\[\d+\]/, `[${index + 1}]`);
+  }
   
+  // Otherwise format from structured data
   const parts = [];
   if (pub.authors && pub.authors.length > 0) {
     parts.push(pub.authors.join(', '));
@@ -17,8 +21,8 @@ function formatCitation(pub, index) {
   if (pub.publisher) parts.push(pub.publisher);
   if (pub.releaseDate) parts.push(pub.releaseDate);
   
-  // Return formatted HTML with the same structure as BibTeX citations
-  return `<div class="csl-bib-body"><div class="csl-entry"><div class="csl-left-margin">[${index + 1}]</div><div class="csl-right-inline">${parts.join(', ')}</div></div></div>`;
+  // Return formatted HTML with the same structure as Citation.js output
+  return `<div class="citation"><div class="csl-bib-body"><div class="csl-entry"><div class="csl-left-margin">[${index + 1}]</div><div class="csl-right-inline">${parts.join(', ')}</div></div></div></div>`;
 }
 
 function formatLocation(loc) {

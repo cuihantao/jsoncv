@@ -48,26 +48,44 @@ export function processBibTeX(bibtexStr, cvData, shouldReplace = false) {
     const cite = new Cite(bibtexStr)
     console.log('[Debug] Total entries in BibTeX:', cite.data.length)
     
-    // Process each entry
+    // Format all entries together to get correct numbering
+    const formattedHTML = cite.format('bibliography', {
+      format: 'html',
+      template: 'ieee',
+      lang: 'en-US'
+    })
+    
+    // Clean up the HTML structure while preserving content
+    const processedHTML = formattedHTML
+      .replace(/\r?\n|\r/g, '') // Remove all newlines
+      .replace(/>\s+</g, '><')  // Remove whitespace between tags
+      .replace(/\s+/g, ' ')     // Replace multiple spaces with single space
+      .replace(/, doi: .*?(?=<\/div>)/g, '')  // Remove DOI from citation text
+      .trim()                   // Remove leading/trailing whitespace
+
+    // Extract individual citations from the processed HTML
+    const citationDivs = processedHTML.match(/<div class="csl-entry">.*?<\/div>/g) || []
+    
+    // Process each entry with its formatted citation
     const publications = cite.data.map((entry, index) => {
-      // Create a single-entry citation for formatting
-      const singleCite = new Cite(entry)
       console.log(`[Debug] Entry ${index} type:`, entry.type)
       
-      // Format this entry using IEEE style
-      let formattedHTML = singleCite.format('bibliography', {
+      // Format individual citation
+      const singleCite = new Cite(entry)
+      const formattedHTML = singleCite.format('bibliography', {
         format: 'html',
         template: 'ieee',
         lang: 'en-US'
       })
-      // Clean up the HTML structure and remove newlines between citation number and content
+      
+      // Clean up the HTML structure
       const processedHTML = formattedHTML
+        .replace(/\r?\n|\r/g, '') // Remove all newlines
         .replace(/>\s+</g, '><')  // Remove whitespace between tags
         .replace(/\s+/g, ' ')     // Replace multiple spaces with single space
-        .replace(/(<div class="csl-left-margin">\[.*?\]<\/div>)\s*(<div class="csl-right-inline">)/, '$1$2')  // Remove space between number and content
-        .replace(/, doi: .*?(?=<\/div>)/, '')  // Remove DOI from citation text
+        .replace(/, doi: .*?(?=<\/div>)/g, '')  // Remove DOI from citation text
         .trim()                   // Remove leading/trailing whitespace
-
+      
       const pubType = PUBLICATION_TYPE_MAP[entry.type] || 'other'
       const pub = {
         name: entry.title,
@@ -75,7 +93,9 @@ export function processBibTeX(bibtexStr, cvData, shouldReplace = false) {
         releaseDate: entry.issued?.['date-parts']?.[0]?.[0]?.toString() || '',
         url: entry.DOI ? `https://doi.org/${entry.DOI}` : entry.URL || '',
         type: pubType,
-        formattedHTML: `<div class="citation">${processedHTML}</div>`,  // Wrap in citation div after processing
+        formattedHTML: `<div class="citation">${processedHTML}</div>`,
+        citationKey: entry.id,
+        bibtexEntry: entry,
         source: 'bibtex'
       }
       return pub
@@ -97,6 +117,7 @@ export function processBibTeX(bibtexStr, cvData, shouldReplace = false) {
       total: newCvData.publications.length,
       fromBibtex: publications.length,
     })
+    console.log(newCvData)
     return newCvData
   } catch (error) {
     console.error('[Error] Failed to process BibTeX:', error)

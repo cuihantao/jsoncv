@@ -575,9 +575,15 @@ section {
       }
 
       // Make citation number and content appear inline
+      .csl-bib-body {
+        display: flex;
+        align-items: flex-start;
+      }
+      
       .csl-entry {
         display: flex;
         align-items: flex-start;
+        flex: 1;
         
         .csl-left-margin {
           min-width: 2.5em;
