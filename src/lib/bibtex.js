@@ -55,12 +55,19 @@ export function processBibTeX(bibtexStr, cvData) {
       console.log(`[Debug] Entry ${index}:`, entry)
       
       // Format this entry using IEEE style
-      const formattedHTML = singleCite.format('bibliography', {
+      let formattedHTML = singleCite.format('bibliography', {
         format: 'html',
         template: 'ieee',
         lang: 'en-US'
       })
-      console.log(`[Debug] Formatted citation ${index}:`, formattedHTML)
+      // Clean up the HTML structure and remove newlines between citation number and content
+      const processedHTML = formattedHTML
+        .replace(/>\s+</g, '><')  // Remove whitespace between tags
+        .replace(/\s+/g, ' ')     // Replace multiple spaces with single space
+        .replace(/(<div class="csl-left-margin">\[.*?\]<\/div>)\s*(<div class="csl-right-inline">)/, '$1$2')  // Remove space between number and content
+        .replace(/, doi: .*?(?=<\/div>)/, '')  // Remove DOI from citation text
+        .trim()                   // Remove leading/trailing whitespace
+      console.log(`[Debug] Formatted citation ${index}:`, processedHTML)
 
       const pubType = PUBLICATION_TYPE_MAP[entry.type] || 'other'
       const pub = {
@@ -68,9 +75,8 @@ export function processBibTeX(bibtexStr, cvData) {
         publisher: entry['container-title'] || entry.journal || '',
         releaseDate: entry.issued?.['date-parts']?.[0]?.[0]?.toString() || '',
         url: entry.DOI ? `https://doi.org/${entry.DOI}` : entry.URL || '',
-        summary: entry.abstract || '',
         type: pubType,
-        formattedHTML: formattedHTML,  // Store the complete formatted HTML
+        formattedHTML: `<div class="citation">${processedHTML}</div>`,  // Wrap in citation div after processing
         source: 'bibtex'
       }
       console.log(`[Debug] Created publication ${index}:`, pub)
