@@ -616,6 +616,18 @@
             "owner": "bold",
             "mentee": "plus"
           }
+        },
+        "pageSize": {
+          "type": "string",
+          "description": "Page size for the CV (A4 or letter)",
+          "enum": ["A4", "letter"],
+          "default": "A4"
+        },
+        "theme": {
+          "type": "string",
+          "description": "Theme for the CV",
+          "enum": ["reorx", "cuiv"],
+          "default": "reorx"
         }
       }
     },
